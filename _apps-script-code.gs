@@ -43,20 +43,34 @@ function doPost(e) {
 
     const sheet = getSheet();
 
+    const baseHeaders = ['Data trimitere', 'Test', 'Nume', 'Prenume', 'Timp folosit'];
+    const sortKeys = (keys) => keys.sort((a, b) => {
+      const order = { g: 1, h: 2, l: 3 };
+      const aSec = order[a[0]] || 99;
+      const bSec = order[b[0]] || 99;
+      if (aSec !== bSec) return aSec - bSec;
+      return parseInt(a.slice(1)) - parseInt(b.slice(1));
+    });
+
     if (sheet.getLastRow() === 0) {
-      const baseHeaders = ['Data trimitere', 'Test', 'Nume', 'Prenume', 'Timp folosit'];
-      const answerKeys = Object.keys(payload.answers || {}).sort((a, b) => {
-        const order = { g: 1, h: 2, l: 3 };
-        const aSec = order[a[0]] || 99;
-        const bSec = order[b[0]] || 99;
-        if (aSec !== bSec) return aSec - bSec;
-        return parseInt(a.slice(1)) - parseInt(b.slice(1));
-      });
+      // Sheet gol → creează antetele complete cu toate cheile
+      const answerKeys = sortKeys(Object.keys(payload.answers || {}));
       const headers = baseHeaders.concat(answerKeys);
       sheet.appendRow(headers);
       const headerRange = sheet.getRange(1, 1, 1, headers.length);
       headerRange.setFontWeight('bold').setBackground('#10B981').setFontColor('#FFFFFF');
       sheet.setFrozenRows(1);
+    } else {
+      // Sheet existent → verifică dacă există chei noi care lipsesc din antet
+      const existingHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      const newKeys = Object.keys(payload.answers || {}).filter(k => existingHeaders.indexOf(k) === -1);
+      if (newKeys.length > 0) {
+        const sortedNew = sortKeys(newKeys);
+        const startCol = sheet.getLastColumn() + 1;
+        sheet.getRange(1, startCol, 1, sortedNew.length).setValues([sortedNew]);
+        const newRange = sheet.getRange(1, startCol, 1, sortedNew.length);
+        newRange.setFontWeight('bold').setBackground('#10B981').setFontColor('#FFFFFF');
+      }
     }
 
     const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
