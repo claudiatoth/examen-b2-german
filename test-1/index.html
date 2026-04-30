@@ -394,6 +394,27 @@
             <p>Mult succes! ʚଓ</p>
             <p style="margin-top: 30px;"><a href="../index.html" style="color: #10B981; font-weight: 600;">← Înapoi la pagina principală</a></p>
         </div>
+
+        <!-- Modal pentru identificare cursant -->
+        <div id="identity-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center;">
+            <div style="background:white; padding:30px 35px; border-radius:14px; max-width:480px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                <h2 style="color:#065f46; margin-top:0;">📝 Identificare cursant</h2>
+                <p style="color:#374151;">Înainte de a trimite examenul, te rog completează numele tău complet pentru ca examinatorul să poată corecta răspunsurile.</p>
+                <div style="margin:18px 0;">
+                    <label style="display:block; font-weight:600; color:#065f46; margin-bottom:6px;">Nume (de familie):</label>
+                    <input type="text" id="modal-nume" style="width:100%; padding:11px; border:2px solid #d1d5db; border-radius:8px; font-size:1rem; box-sizing:border-box;" placeholder="ex: Popescu" autocomplete="family-name">
+                </div>
+                <div style="margin:18px 0;">
+                    <label style="display:block; font-weight:600; color:#065f46; margin-bottom:6px;">Prenume:</label>
+                    <input type="text" id="modal-prenume" style="width:100%; padding:11px; border:2px solid #d1d5db; border-radius:8px; font-size:1rem; box-sizing:border-box;" placeholder="ex: Maria" autocomplete="given-name">
+                </div>
+                <div id="modal-error" style="color:#dc2626; font-size:0.9rem; margin:8px 0; display:none;">⚠️ Te rog completează ambele câmpuri.</div>
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                    <button onclick="cancelSubmit()" style="background:#6b7280; color:white; border:none; padding:11px 22px; border-radius:8px; cursor:pointer; font-weight:600;">Anulează</button>
+                    <button onclick="confirmSubmit()" style="background:#10B981; color:white; border:none; padding:11px 22px; border-radius:8px; cursor:pointer; font-weight:600;">✓ Trimite examenul</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="test.js"></script>

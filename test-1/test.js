@@ -133,10 +133,9 @@ function loadAnswers() {
 }
 
 // ============================================
-// SUBMIT — trimite răspunsurile la Google Sheets + email automat
-// Cursantul NU vede scorul — doar mesaj de confirmare
+// SUBMIT — pas 1: deschide modalul de identificare
 // ============================================
-async function submitExam() {
+function submitExam() {
     const answers = collectAnswers();
     const totalQuestions = 33;
     const answeredCount = Object.values(answers).filter(v => v && v.length > 0).length;
@@ -146,32 +145,51 @@ async function submitExam() {
         if (!proceed) return;
     }
 
-    // Cere numele și prenumele (examinatorul trebuie să știe cine a trimis)
-    let nume = prompt('Introdu numele tău (de familie):');
-    if (!nume) {
-        alert('Numele este obligatoriu pentru a trimite examenul.');
-        return;
-    }
-    let prenume = prompt('Introdu prenumele tău:');
-    if (!prenume) {
-        alert('Prenumele este obligatoriu pentru a trimite examenul.');
-        return;
-    }
+    // Deschide modal pentru nume + prenume
+    const modal = document.getElementById('identity-modal');
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        const nume = document.getElementById('modal-nume');
+        if (nume) nume.focus();
+    }, 50);
+}
 
+function cancelSubmit() {
+    document.getElementById('identity-modal').style.display = 'none';
+}
+
+// SUBMIT — pas 2: după ce a confirmat din modal, trimite efectiv
+async function confirmSubmit() {
+    const numeInput = document.getElementById('modal-nume');
+    const prenumeInput = document.getElementById('modal-prenume');
+    const errorBox = document.getElementById('modal-error');
+    const nume = numeInput.value.trim();
+    const prenume = prenumeInput.value.trim();
+
+    if (!nume || !prenume) {
+        errorBox.style.display = 'block';
+        if (!nume) numeInput.style.borderColor = '#dc2626';
+        if (!prenume) prenumeInput.style.borderColor = '#dc2626';
+        return;
+    }
+    errorBox.style.display = 'none';
+
+    const answers = collectAnswers();
     saveAnswers();
     if (timerInterval) clearInterval(timerInterval);
 
     const submission = {
         token: SUBMIT_TOKEN,
         test: 'Test 1 — Arbeit & Beruf',
-        cursantNume: nume.trim(),
-        cursantPrenume: prenume.trim(),
+        cursantNume: nume,
+        cursantPrenume: prenume,
         submittedAt: new Date().toLocaleString('ro-RO'),
         timeUsed: formatTime(TEST_DURATION_SECONDS - secondsLeft),
         answers: answers
     };
 
-    // Arată mesaj de „se trimite..."
+    // Închide modalul, arată "se trimite..."
+    document.getElementById('identity-modal').style.display = 'none';
     const submitBtn = document.querySelector('.submit-btn');
     if (submitBtn) {
         submitBtn.disabled = true;
@@ -180,8 +198,6 @@ async function submitExam() {
 
     let success = false;
     try {
-        // Notă: folosim mode 'no-cors' pentru că Apps Script nu suportă CORS pe POST
-        // Răspunsul nu va fi citibil, dar trimiterea funcționează
         await fetch(SUBMIT_ENDPOINT, {
             method: 'POST',
             mode: 'no-cors',
@@ -194,13 +210,13 @@ async function submitExam() {
         success = false;
     }
 
-    // Backup: descarcă JSON local indiferent dacă a mers (în caz că ceva s-a stricat în transmisie)
+    // Backup local
     try {
         const blob = new Blob([JSON.stringify(submission, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `raspunsuri-test-1-${nume.trim()}-${Date.now()}.json`;
+        a.download = `raspunsuri-test-1-${nume}-${Date.now()}.json`;
         a.style.display = 'none';
         document.body.appendChild(a);
         a.click();
@@ -210,15 +226,14 @@ async function submitExam() {
         console.log('Download error:', e);
     }
 
-    if (success) {
-        document.getElementById('exam-content').style.display = 'none';
-        document.getElementById('submitted').style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-        alert('A apărut o problemă la trimiterea online. Răspunsurile au fost descărcate ca fișier JSON pe calculatorul tău. Te rog trimite acel fișier prin email la etommlearning@gmail.com.');
-        document.getElementById('exam-content').style.display = 'none';
-        document.getElementById('submitted').style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('exam-content').style.display = 'none';
+    document.getElementById('submitted').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (!success) {
+        setTimeout(() => {
+            alert('A apărut o problemă la trimiterea online, dar răspunsurile au fost salvate local ca fișier JSON. Te rog trimite acel fișier prin email la etommlearning@gmail.com.');
+        }, 500);
     }
 }
 
