@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test 1 - Arbeit & Beruf - Examen B2</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .timer-bar { position: sticky; top: 0; z-index: 100; background: #065f46; color: white; padding: 12px 20px; text-align: center; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .timer-bar .time { font-size: 1.4rem; }
+        .exam-section { background: white; border: 2px solid #d1fae5; border-radius: 12px; padding: 24px; margin: 25px 0; }
+        .exam-section h2 { color: #065f46; border-bottom: 2px solid #10B981; padding-bottom: 10px; }
+        .exam-meta { display: flex; gap: 15px; flex-wrap: wrap; margin: 10px 0 20px; font-size: 0.9rem; color: #6b7280; }
+        .exam-meta span { background: #f0fdf4; padding: 4px 10px; border-radius: 6px; }
+        .question { margin: 18px 0; padding: 14px; background: #fafafa; border-radius: 8px; border-left: 3px solid #10B981; }
+        .question-num { display: inline-block; background: #10B981; color: white; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; margin-right: 8px; }
+        .question input[type="text"] { width: 100%; padding: 9px; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 6px; font-size: 1rem; box-sizing: border-box; }
+        .question input[type="text"]:focus { border-color: #10B981; outline: none; }
+        .mc-row { margin: 6px 0; }
+        .mc-row input[type="radio"] { margin-right: 8px; }
+        .audio-player-exam { background: #eff6ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 14px; margin: 12px 0; }
+        .audio-player-exam button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-right: 8px; }
+        .audio-player-exam .plays-left { color: #6b7280; font-size: 0.9rem; margin-left: 10px; }
+        .reading-text { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 18px 22px; border-radius: 8px; margin: 15px 0; line-height: 1.7; }
+        .reading-text p { margin: 0.6em 0; }
+        .reading-text h3 { margin-top: 0; color: #92400e; }
+        .submit-btn { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: none; padding: 18px 40px; border-radius: 12px; font-size: 1.2rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35); display: block; margin: 40px auto; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45); }
+        .submitted-message { display: none; background: #d1fae5; border: 3px solid #10B981; border-radius: 12px; padding: 40px; text-align: center; }
+        .submitted-message h2 { color: #065f46; font-size: 2rem; margin-bottom: 15px; }
+        .submitted-message p { font-size: 1.15rem; color: #374151; }
+        .speaking-card { background: #f0fdf4; border-left: 4px solid #10B981; padding: 18px 22px; border-radius: 8px; margin: 15px 0; }
+        .speaking-card h4 { color: #065f46; margin-top: 0; }
+        .info-warning { background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 14px; margin: 18px 0; color: #78350f; font-weight: 600; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="timer-bar">
+        ⏱️ Timp rămas: <span class="time" id="timer">60:00</span> · Test 1 — Arbeit & Beruf · 100 puncte · Prag promovare 60%
+    </div>
+
+    <nav class="navbar">
+        <a href="../index.html" class="navbar-logo">ʚଓ Claudia Toth</a>
+        <ul class="navbar-menu">
+            <li><a href="#grammatik">1. Grammatik</a></li>
+            <li><a href="#hoeren">2. Hörverstehen</a></li>
+            <li><a href="#lesen">3. Leseverstehen</a></li>
+            <li><a href="#sprechen">4. Sprechen</a></li>
+            <li><a href="../index.html">← Înapoi</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>ʚଓ Test 1 — Arbeit & Beruf</h1>
+            <p class="subtitle">Examen B2 · Nivel ușor · 60 minute</p>
+            <p>Curs autorizat ANC · Claudia Toth · © 2026</p>
+        </div>
+
+        <div class="content" id="exam-content">
+
+            <div class="info-warning">
+                ⚠️ Citește toate întrebările cu atenție. La final apasă „Trimite examenul". <strong>Nu vei vedea scorul</strong> — corectarea o face examinatorul.
+            </div>
+
+            <!-- ============ 1. GRAMMATIK ============ -->
+            <div class="exam-section" id="grammatik">
+                <h2>📝 1. Grammatik (Sprachbausteine)</h2>
+                <div class="exam-meta"><span>⏱️ 15 min</span><span>📋 15 itemi</span><span>💯 30 puncte</span></div>
+
+                <h3 style="color: #059669;">A. Konnektoren — completează cu cuvântul potrivit</h3>
+                <p style="color: #6b7280; font-style: italic;">Alege: weil · deshalb · wenn · aber · denn</p>
+
+                <div class="question">
+                    <span class="question-num">1</span>
+                    Ich gehe heute nicht zur Arbeit, ____________ ich bin krank.
+                    <input type="text" name="g1" placeholder="weil / deshalb / wenn / aber / denn">
+                </div>
+                <div class="question">
+                    <span class="question-num">2</span>
+                    Er hat gute Noten bekommen, ____________ er fleißig gelernt hat.
+                    <input type="text" name="g2" placeholder="weil / deshalb / wenn / aber / denn">
+                </div>
+                <div class="question">
+                    <span class="question-num">3</span>
+                    Sie möchte in Deutschland arbeiten, ____________ sie spricht noch nicht gut Deutsch.
+                    <input type="text" name="g3" placeholder="weil / deshalb / wenn / aber / denn">
+                </div>
+                <div class="question">
+                    <span class="question-num">4</span>
+                    ____________ ich Zeit habe, besuche ich meine Großmutter.
+                    <input type="text" name="g4" placeholder="weil / deshalb / wenn / aber / denn">
+                </div>
+                <div class="question">
+                    <span class="question-num">5</span>
+                    Der Bus war voll, ____________ habe ich ein Taxi genommen.
+                    <input type="text" name="g5" placeholder="weil / deshalb / wenn / aber / denn">
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">B. Prepoziții cu cazuri — alege varianta corectă</h3>
+
+                <div class="question">
+                    <span class="question-num">6</span>
+                    Ich arbeite seit drei Jahren ____________ einer großen Firma.
+                    <div class="mc-row"><input type="radio" name="g6" value="a" id="g6a"><label for="g6a">a) für</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="b" id="g6b"><label for="g6b">b) bei</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="c" id="g6c"><label for="g6c">c) mit</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="d" id="g6d"><label for="g6d">d) von</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">7</span>
+                    Sie fährt jeden Tag ____________ dem Fahrrad ins Büro.
+                    <div class="mc-row"><input type="radio" name="g7" value="a" id="g7a"><label for="g7a">a) mit</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="b" id="g7b"><label for="g7b">b) für</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="c" id="g7c"><label for="g7c">c) bei</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="d" id="g7d"><label for="g7d">d) durch</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">8</span>
+                    Dieses Geschenk ist ____________ meinen Chef.
+                    <div class="mc-row"><input type="radio" name="g8" value="a" id="g8a"><label for="g8a">a) für</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="b" id="g8b"><label for="g8b">b) zu</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="c" id="g8c"><label for="g8c">c) auf</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="d" id="g8d"><label for="g8d">d) von</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">9</span>
+                    Der Brief ist ____________ meiner Kollegin.
+                    <div class="mc-row"><input type="radio" name="g9" value="a" id="g9a"><label for="g9a">a) für</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="b" id="g9b"><label for="g9b">b) bei</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="c" id="g9c"><label for="g9c">c) von</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="d" id="g9d"><label for="g9d">d) durch</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">10</span>
+                    Ich wohne ____________ Berlin.
+                    <div class="mc-row"><input type="radio" name="g10" value="a" id="g10a"><label for="g10a">a) in</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="b" id="g10b"><label for="g10b">b) auf</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="c" id="g10c"><label for="g10c">c) zu</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="d" id="g10d"><label for="g10d">d) bei</label></div>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">C. Aktiv → Passiv (Präsens) — transformă propoziția</h3>
+                <p style="color: #6b7280; font-style: italic;">Exemplu: Der Chef schreibt den Brief. → Der Brief wird vom Chef geschrieben.</p>
+
+                <div class="question">
+                    <span class="question-num">11</span>
+                    Aktiv: <em>Die Firma stellt zehn neue Mitarbeiter ein.</em><br>
+                    Passiv: <input type="text" name="g11" placeholder="Zehn neue Mitarbeiter ___">
+                </div>
+                <div class="question">
+                    <span class="question-num">12</span>
+                    Aktiv: <em>Der Manager organisiert das Meeting.</em><br>
+                    Passiv: <input type="text" name="g12" placeholder="Das Meeting ___">
+                </div>
+                <div class="question">
+                    <span class="question-num">13</span>
+                    Aktiv: <em>Die Sekretärin schreibt den Bericht.</em><br>
+                    Passiv: <input type="text" name="g13" placeholder="Der Bericht ___">
+                </div>
+                <div class="question">
+                    <span class="question-num">14</span>
+                    Aktiv: <em>Der Lehrer erklärt die Regel.</em><br>
+                    Passiv: <input type="text" name="g14" placeholder="Die Regel ___">
+                </div>
+                <div class="question">
+                    <span class="question-num">15</span>
+                    Aktiv: <em>Die Mutter kauft das Brot.</em><br>
+                    Passiv: <input type="text" name="g15" placeholder="Das Brot ___">
+                </div>
+            </div>
+
+            <!-- ============ 2. HÖRVERSTEHEN ============ -->
+            <div class="exam-section" id="hoeren">
+                <h2>🎧 2. Hörverstehen</h2>
+                <div class="exam-meta"><span>⏱️ 10 min</span><span>📋 8 itemi</span><span>💯 20 puncte</span></div>
+
+                <h3 style="color: #059669;">Audio 1 — Dialog la cafenea (poți asculta de 2 ori)</h3>
+                <div class="audio-player-exam">
+                    <button onclick="playAudio('audio-1')">▶ Redă Audio 1</button>
+                    <button onclick="pauseAudio('audio-1')">⏸ Pauză</button>
+                    <span class="plays-left" id="plays-1">Ascultări rămase: 2</span>
+                    <audio id="audio-1" preload="none"><source src="audio/01-dialog.mp3" type="audio/mpeg"></audio>
+                </div>
+
+                <div class="question">
+                    <span class="question-num">16</span>
+                    Wo arbeitet Peter jetzt?
+                    <div class="mc-row"><input type="radio" name="h1" value="a" id="h1a"><label for="h1a">a) In einer kleinen Firma in der Stadt</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="b" id="h1b"><label for="h1b">b) Bei einer großen IT-Firma</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="c" id="h1c"><label for="h1c">c) Im Homeoffice für mehrere Kunden</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="d" id="h1d"><label for="h1d">d) Bei einer Bank</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">17</span>
+                    Warum hat Peter den Job gewechselt?
+                    <div class="mc-row"><input type="radio" name="h2" value="a" id="h2a"><label for="h2a">a) Wegen besseren Gehalts und besserer Stimmung</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="b" id="h2b"><label for="h2b">b) Weil er umgezogen ist</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="c" id="h2c"><label for="h2c">c) Weil seine alte Firma geschlossen hat</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="d" id="h2d"><label for="h2d">d) Weil er einen Kollegen nicht mochte</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">18</span>
+                    Wie viele Tage pro Woche arbeitet Peter im Homeoffice?
+                    <div class="mc-row"><input type="radio" name="h3" value="a" id="h3a"><label for="h3a">a) 1 Tag</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="b" id="h3b"><label for="h3b">b) 2 Tage</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="c" id="h3c"><label for="h3c">c) 3 Tage</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="d" id="h3d"><label for="h3d">d) 5 Tage</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">19</span>
+                    Was empfiehlt Peter Anna?
+                    <div class="mc-row"><input type="radio" name="h4" value="a" id="h4a"><label for="h4a">a) Sich auch eine neue Stelle zu suchen</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="b" id="h4b"><label for="h4b">b) Mit ihrem Chef zu sprechen</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="c" id="h4c"><label for="h4c">c) Eine Pause zu machen</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="d" id="h4d"><label for="h4d">d) Eine Weiterbildung zu machen</label></div>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">Audio 2 — Anunț la radio (poți asculta de 2 ori)</h3>
+                <div class="audio-player-exam">
+                    <button onclick="playAudio('audio-2')">▶ Redă Audio 2</button>
+                    <button onclick="pauseAudio('audio-2')">⏸ Pauză</button>
+                    <span class="plays-left" id="plays-2">Ascultări rămase: 2</span>
+                    <audio id="audio-2" preload="none"><source src="audio/02-monolog.mp3" type="audio/mpeg"></audio>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic;">Bifează <strong>Richtig (R)</strong> sau <strong>Falsch (F)</strong>:</p>
+
+                <div class="question">
+                    <span class="question-num">20</span>
+                    Die Agentur „JobStar" hilft jungen Menschen, einen Job zu finden.
+                    <div class="mc-row"><input type="radio" name="h5" value="R" id="h5r"><label for="h5r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h5" value="F" id="h5f"><label for="h5f">F — Falsch</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">21</span>
+                    Die Beratung kostet 100 Euro.
+                    <div class="mc-row"><input type="radio" name="h6" value="R" id="h6r"><label for="h6r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h6" value="F" id="h6f"><label for="h6f">F — Falsch</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">22</span>
+                    Die Agentur arbeitet nur mit Firmen aus Deutschland.
+                    <div class="mc-row"><input type="radio" name="h7" value="R" id="h7r"><label for="h7r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h7" value="F" id="h7f"><label for="h7f">F — Falsch</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">23</span>
+                    Man kann sich online oder telefonisch anmelden.
+                    <div class="mc-row"><input type="radio" name="h8" value="R" id="h8r"><label for="h8r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h8" value="F" id="h8f"><label for="h8f">F — Falsch</label></div>
+                </div>
+            </div>
+
+            <!-- ============ 3. LESEVERSTEHEN ============ -->
+            <div class="exam-section" id="lesen">
+                <h2>📖 3. Leseverstehen</h2>
+                <div class="exam-meta"><span>⏱️ 20 min</span><span>📋 10 itemi</span><span>💯 30 puncte</span></div>
+
+                <h3 style="color: #059669;">Text 1 — Articol</h3>
+                <div class="reading-text">
+                    <h3>Neue Trends auf dem Arbeitsmarkt</h3>
+                    <p>In den letzten Jahren hat sich die Arbeitswelt stark verändert. Immer mehr Menschen arbeiten von zu Hause aus — das nennt man Homeoffice. Während der Corona-Pandemie haben viele Firmen entdeckt, dass ihre Mitarbeiter auch von zu Hause produktiv sein können. Heute bieten etwa 60 Prozent der deutschen Unternehmen ihren Angestellten flexible Arbeitsmodelle an.</p>
+                    <p>Ein weiterer Trend ist die sogenannte Vier-Tage-Woche. In einigen Ländern, zum Beispiel in Island, haben Experimente gezeigt, dass Menschen, die nur vier Tage pro Woche arbeiten, oft glücklicher und gesünder sind. Außerdem sind sie nicht weniger produktiv als Kollegen mit fünf Arbeitstagen.</p>
+                    <p>Aber nicht alles ist positiv. Viele junge Menschen klagen, dass die Grenze zwischen Arbeit und Freizeit verschwimmt. Wenn man zu Hause arbeitet, ist es schwer, am Abend wirklich Feierabend zu machen. Experten empfehlen deshalb feste Arbeitszeiten und einen separaten Arbeitsplatz im Haus.</p>
+                    <p>Trotz aller Schwierigkeiten: Die Zukunft der Arbeit wird flexibler — und das ist für die meisten eine gute Nachricht.</p>
+                </div>
+
+                <div class="question">
+                    <span class="question-num">24</span>
+                    Wann haben viele Firmen Homeoffice entdeckt?
+                    <div class="mc-row"><input type="radio" name="l1" value="a" id="l1a"><label for="l1a">a) Vor 20 Jahren</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="b" id="l1b"><label for="l1b">b) Während der Corona-Pandemie</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="c" id="l1c"><label for="l1c">c) Erst dieses Jahr</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="d" id="l1d"><label for="l1d">d) Im Sommer 2024</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">25</span>
+                    Wie viele deutsche Firmen bieten flexible Arbeitsmodelle an?
+                    <div class="mc-row"><input type="radio" name="l2" value="a" id="l2a"><label for="l2a">a) Etwa 30%</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="b" id="l2b"><label for="l2b">b) Etwa 60%</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="c" id="l2c"><label for="l2c">c) Etwa 80%</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="d" id="l2d"><label for="l2d">d) Alle Firmen</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">26</span>
+                    Was haben Experimente in Island gezeigt?
+                    <div class="mc-row"><input type="radio" name="l3" value="a" id="l3a"><label for="l3a">a) Vier-Tage-Woche macht Menschen weniger produktiv</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="b" id="l3b"><label for="l3b">b) Vier-Tage-Woche macht Menschen glücklicher und ist nicht weniger produktiv</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="c" id="l3c"><label for="l3c">c) Die Vier-Tage-Woche kostet zu viel</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="d" id="l3d"><label for="l3d">d) Niemand will eine Vier-Tage-Woche</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">27</span>
+                    Was ist ein Problem beim Homeoffice?
+                    <div class="mc-row"><input type="radio" name="l4" value="a" id="l4a"><label for="l4a">a) Man verdient weniger Geld</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="b" id="l4b"><label for="l4b">b) Die Grenze zwischen Arbeit und Freizeit verschwimmt</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="c" id="l4c"><label for="l4c">c) Der Computer ist langsamer</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="d" id="l4d"><label for="l4d">d) Die Kollegen sind zu laut</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">28</span>
+                    Was empfehlen Experten?
+                    <div class="mc-row"><input type="radio" name="l5" value="a" id="l5a"><label for="l5a">a) Niemals zu Hause zu arbeiten</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="b" id="l5b"><label for="l5b">b) Feste Arbeitszeiten und einen separaten Arbeitsplatz</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="c" id="l5c"><label for="l5c">c) Nur am Wochenende zu arbeiten</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="d" id="l5d"><label for="l5d">d) Den Beruf zu wechseln</label></div>
+                </div>
+                <div class="question">
+                    <span class="question-num">29</span>
+                    Welche Aussage über die Zukunft der Arbeit ist im Text zu finden?
+                    <div class="mc-row"><input type="radio" name="l6" value="a" id="l6a"><label for="l6a">a) Die Arbeit wird flexibler — eine gute Nachricht für die meisten</label></div>
+                    <div class="mc-row"><input type="radio" name="l6" value="b" id="l6b"><label for="l6b">b) Die Arbeit wird schlechter</label></div>
+                    <div class="mc-row"><input type="radio" name="l6" value="c" id="l6c"><label for="l6c">c) Es wird keine Arbeit mehr geben</label></div>
+                    <div class="mc-row"><input type="radio" name="l6" value="d" id="l6d"><label for="l6d">d) Alle werden mehr arbeiten</label></div>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">Text 2 — Email cu ofertă de job</h3>
+                <div class="reading-text">
+                    <h3>E-Mail von der Firma „TechSoft GmbH"</h3>
+                    <p><strong>Sehr geehrte Frau Müller,</strong></p>
+                    <p>vielen Dank für Ihre Bewerbung als Marketing-Managerin in unserer Firma. Wir freuen uns, Ihnen mitzuteilen, dass wir Sie zu einem Vorstellungsgespräch einladen möchten.</p>
+                    <p>Das Gespräch findet am <strong>Montag, 15. Juli 2026, um 10:00 Uhr</strong> in unserem Hauptbüro in München statt. Bitte bringen Sie Ihren Lebenslauf und Ihre Zeugnisse mit. Das Gespräch dauert ungefähr eine Stunde.</p>
+                    <p>Wenn Sie an diesem Termin nicht kommen können, schreiben Sie uns bitte bis Freitag eine E-Mail. Wir können dann einen anderen Termin finden.</p>
+                    <p>Wir bieten Ihnen ein Gehalt von 3.500 Euro pro Monat, 28 Urlaubstage pro Jahr und die Möglichkeit, zwei Tage pro Woche im Homeoffice zu arbeiten.</p>
+                    <p>Mit freundlichen Grüßen,<br>Thomas Weber<br>Personalabteilung</p>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic;">Răspunde scurt (un cuvânt sau o cifră):</p>
+
+                <div class="question">
+                    <span class="question-num">30</span>
+                    Für welche Stelle hat sich Frau Müller beworben?
+                    <input type="text" name="l7" placeholder="ex: Sekretärin">
+                </div>
+                <div class="question">
+                    <span class="question-num">31</span>
+                    Wann findet das Vorstellungsgespräch statt? (Datum)
+                    <input type="text" name="l8" placeholder="ex: 1. Januar 2026">
+                </div>
+                <div class="question">
+                    <span class="question-num">32</span>
+                    Wie viel Gehalt wird angeboten? (in Euro)
+                    <input type="text" name="l9" placeholder="ex: 1000 Euro">
+                </div>
+                <div class="question">
+                    <span class="question-num">33</span>
+                    Wie viele Tage pro Woche kann sie im Homeoffice arbeiten?
+                    <input type="text" name="l10" placeholder="ex: 1">
+                </div>
+            </div>
+
+            <!-- ============ 4. SPRECHEN ============ -->
+            <div class="exam-section" id="sprechen">
+                <h2>🗣️ 4. Sprechen (proba orală)</h2>
+                <div class="exam-meta"><span>⏱️ 15 min</span><span>📋 2 sarcini</span><span>💯 20 puncte</span></div>
+
+                <p style="background: #fef3c7; padding: 12px 16px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                    <strong>Atenție:</strong> Această secțiune se desfășoară <strong>oral cu examinatorul</strong>. Citește cu atenție temele de mai jos. Vei avea 5 minute de pregătire înainte să începi.
+                </p>
+
+                <div class="speaking-card">
+                    <h4>🎙️ Sarcina A — Monolog (3 minute)</h4>
+                    <p><strong>Tema:</strong> „Beschreib deinen idealen Beruf" (Descrie meseria ta ideală)</p>
+                    <p><strong>Acoperă următoarele puncte:</strong></p>
+                    <ul>
+                        <li>Welche Aufgaben möchtest du jeden Tag machen? <em>(Ce sarcini ai vrea să faci zilnic?)</em></li>
+                        <li>Wie viel möchtest du verdienen und warum? <em>(Cât ai vrea să câștigi și de ce?)</em></li>
+                        <li>Wie soll die Atmosphäre am Arbeitsplatz sein? <em>(Cum ar trebui să fie atmosfera la locul de muncă?)</em></li>
+                    </ul>
+                </div>
+
+                <div class="speaking-card">
+                    <h4>💬 Sarcina B — Dialog cu examinatorul (5 minute)</h4>
+                    <p><strong>Scenariu:</strong> Te-ai întâlnit cu un fost coleg după 5 ani. Discutați despre:</p>
+                    <ul>
+                        <li>Wie hat sich dein Job in den letzten 5 Jahren verändert?</li>
+                        <li>Was sind deine Pläne für die Zukunft?</li>
+                        <li>Empfiehlst du deinen Beruf jungen Menschen? Warum / warum nicht?</li>
+                    </ul>
+                    <p style="font-style: italic; color: #6b7280;">Examinatorul îți va pune întrebări la care răspunzi natural, ca într-o conversație reală.</p>
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="submitExam()">📨 Trimite examenul</button>
+
+        </div>
+
+        <div class="submitted-message" id="submitted">
+            <h2>✓ Examenul a fost trimis!</h2>
+            <p>Ai finalizat Test 1 — Arbeit & Beruf.</p>
+            <p>Răspunsurile tale au fost salvate. <strong>Examinatorul</strong> îți va comunica scorul și rezultatul după ce verifică totul.</p>
+            <p>Mult succes! ʚଓ</p>
+            <p style="margin-top: 30px;"><a href="../index.html" style="color: #10B981; font-weight: 600;">← Înapoi la pagina principală</a></p>
+        </div>
+    </div>
+
+    <script src="test.js"></script>
+</body>
+</html>
