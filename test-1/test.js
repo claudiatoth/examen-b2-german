@@ -9,6 +9,10 @@ const TEST_ID = 'examen-b2-test-1';
 const TEST_DURATION_SECONDS = 60 * 60; // 60 minute
 const MAX_AUDIO_PLAYS = 2; // fiecare audio poate fi ascultat de cel mult 2 ori
 
+// Endpoint Google Apps Script (primește răspunsurile + trimite email + salvează în Sheet)
+const SUBMIT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyKx7lFeOajnwA9HKQ03gnu_pWoT7c_jyq9XY8KfvrBE_GJIyANIBP7FB-VNp39tqRM/exec';
+const SUBMIT_TOKEN = 'CT-EXAMEN-B2-2026-X9K3M7';
+
 // ============================================
 // TIMER (60 min)
 // ============================================
@@ -129,41 +133,74 @@ function loadAnswers() {
 }
 
 // ============================================
-// SUBMIT — afișează doar mesaj de confirmare, FĂRĂ scor
+// SUBMIT — trimite răspunsurile la Google Sheets + email automat
+// Cursantul NU vede scorul — doar mesaj de confirmare
 // ============================================
-function submitExam() {
+async function submitExam() {
     const answers = collectAnswers();
-    const totalQuestions = 33; // 15 grammatik + 8 hörverstehen + 10 leseverstehen
+    const totalQuestions = 33;
     const answeredCount = Object.values(answers).filter(v => v && v.length > 0).length;
 
-    // Confirmare
     if (answeredCount < totalQuestions) {
-        const proceed = confirm(`Ai răspuns la ${answeredCount} din ${totalQuestions} întrebări (proba scrisă). Sigur vrei să trimiți examenul acum?`);
+        const proceed = confirm(`Ai răspuns la ${answeredCount} din ${totalQuestions} întrebări. Sigur vrei să trimiți examenul acum?`);
         if (!proceed) return;
     }
 
-    // Salvare finală
+    // Cere numele și prenumele (examinatorul trebuie să știe cine a trimis)
+    let nume = prompt('Introdu numele tău (de familie):');
+    if (!nume) {
+        alert('Numele este obligatoriu pentru a trimite examenul.');
+        return;
+    }
+    let prenume = prompt('Introdu prenumele tău:');
+    if (!prenume) {
+        alert('Prenumele este obligatoriu pentru a trimite examenul.');
+        return;
+    }
+
     saveAnswers();
     if (timerInterval) clearInterval(timerInterval);
 
-    // Pregătește pachetul pentru examinator (descărcabil ca JSON)
     const submission = {
+        token: SUBMIT_TOKEN,
         test: 'Test 1 — Arbeit & Beruf',
+        cursantNume: nume.trim(),
+        cursantPrenume: prenume.trim(),
         submittedAt: new Date().toLocaleString('ro-RO'),
         timeUsed: formatTime(TEST_DURATION_SECONDS - secondsLeft),
-        answers: answers,
-        // Spațiu pentru identificare cursant — completat manual de examinator
-        cursantNume: '_________________________',
-        cursantPrenume: '_________________________'
+        answers: answers
     };
 
-    // Oferă opțiunea de download a răspunsurilor (pentru predare la examinator dacă e nevoie)
+    // Arată mesaj de „se trimite..."
+    const submitBtn = document.querySelector('.submit-btn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = '⏳ Se trimite examenul...';
+    }
+
+    let success = false;
+    try {
+        // Notă: folosim mode 'no-cors' pentru că Apps Script nu suportă CORS pe POST
+        // Răspunsul nu va fi citibil, dar trimiterea funcționează
+        await fetch(SUBMIT_ENDPOINT, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(submission)
+        });
+        success = true;
+    } catch (err) {
+        console.log('Submit error:', err);
+        success = false;
+    }
+
+    // Backup: descarcă JSON local indiferent dacă a mers (în caz că ceva s-a stricat în transmisie)
     try {
         const blob = new Blob([JSON.stringify(submission, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `raspunsuri-test-1-${Date.now()}.json`;
+        a.download = `raspunsuri-test-1-${nume.trim()}-${Date.now()}.json`;
         a.style.display = 'none';
         document.body.appendChild(a);
         a.click();
@@ -173,10 +210,16 @@ function submitExam() {
         console.log('Download error:', e);
     }
 
-    // Ascunde examenul, arată mesajul de confirmare
-    document.getElementById('exam-content').style.display = 'none';
-    document.getElementById('submitted').style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (success) {
+        document.getElementById('exam-content').style.display = 'none';
+        document.getElementById('submitted').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        alert('A apărut o problemă la trimiterea online. Răspunsurile au fost descărcate ca fișier JSON pe calculatorul tău. Te rog trimite acel fișier prin email la etommlearning@gmail.com.');
+        document.getElementById('exam-content').style.display = 'none';
+        document.getElementById('submitted').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 }
 
 // ============================================
