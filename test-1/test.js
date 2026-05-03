@@ -209,6 +209,12 @@ function saveAnswers() {
     } catch (e) { console.log('Save error:', e); }
 }
 
+function resetTest() {
+    if (!confirm('Sigur vrei să reiei testul de la zero? Toate răspunsurile salvate vor fi șterse.')) return;
+    try { localStorage.removeItem(TEST_ID); } catch (e) {}
+    location.reload();
+}
+
 function loadAnswers() {
     try {
         const raw = localStorage.getItem(TEST_ID);
@@ -385,6 +391,9 @@ async function confirmSubmit() {
     document.getElementById('exam-content').style.display = 'none';
     document.getElementById('submitted').style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Curățăm localStorage după submit reușit — la următoarea vizită testul pornește gol
+    try { localStorage.removeItem(TEST_ID); } catch (e) {}
 
     if (!success) {
         setTimeout(() => {
