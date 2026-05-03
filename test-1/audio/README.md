@@ -1,17 +1,18 @@
 # Audio pentru Test 1 — Arbeit & Beruf
 
-Folderul așteaptă **2 fișiere MP3** pe care urmează să le înregistrezi tu.
+Folderul așteaptă **1 fișier MP3** (dialog), de înregistrat de tine.
 
-## 📋 Fișiere așteptate
+> **Notă:** versiunea inițială avea și un al 2-lea audio (monolog JobStar). A fost mutat ca rezervă pentru Test 2 — vezi `examen-b2-german/_rezerva-test-2.md`.
 
-| # | Fișier | Tip | Voci | Durată estimată | Conținut |
-|---|---|---|---|---|---|
-| 1 | `01-dialog.mp3` | Dialog | 2 voci (Anna feminin + Peter masculin) | ~90 sec | Conversație la cafenea despre schimbarea jobului |
-| 2 | `02-monolog.mp3` | Monolog/anunț | 1 voce (narator) | ~60 sec | Anunț la radio despre agenția de recrutare „JobStar" |
+## 📋 Fișier așteptat
+
+| # | Fișier | Tip | Voci | Durată estimată |
+|---|---|---|---|---|
+| 1 | `01-dialog.mp3` | Dialog la cafenea | 2 voci (Anna feminin + Peter masculin) | ~90 sec |
 
 ---
 
-## 🎙️ Textul Audio 1 — Dialog la cafenea (`01-dialog.mp3`)
+## 🎙️ Textul Audio — Dialog la cafenea (`01-dialog.mp3`)
 
 **Instrucțiuni:** Vorbește natural, ritm normal de conversație. Pauză scurtă între replici. Anna = voce feminină, Peter = voce masculină. Dacă înregistrezi singură, schimbă tonul/accentul ca să se distingă clar.
 
@@ -32,65 +33,47 @@ ANNA: Verstehe. Und arbeitest du jeden Tag im Büro?
 
 PETER: Nein, zum Glück nicht! Ich arbeite drei Tage pro Woche im Homeoffice. Das ist sehr praktisch.
 
-ANNA: Toll! Ich überlege auch, etwas zu ändern. Mein Job ist so stressig.
+ANNA: Toll! Ich überlege auch, etwas zu ändern. Mein Job ist so stressig — aber kündigen will ich noch nicht.
 
 PETER: Dann solltest du unbedingt mit deinem Chef sprechen. Vielleicht findet ihr eine Lösung. Wenn nicht — such dir einfach etwas Neues!
 
-ANNA: Du hast recht. Danke für den Tipp!
+ANNA: Du hast recht. Danke für den Tipp! Lass uns nächste Woche wieder treffen, ja?
+
+PETER: Gern! Bis bald, Anna.
 ```
 
-**Punctele cheie pentru întrebări (16-19):**
-- Întrebarea 16: Peter lucrează la o firmă mare de IT → răspuns **b**
-- Întrebarea 17: A schimbat din cauza salariului mai bun și atmosferei → răspuns **a**
-- Întrebarea 18: 3 zile pe săptămână în homeoffice → răspuns **c**
-- Întrebarea 19: Recomandă să vorbească cu șeful → răspuns **b**
+**Punctele cheie pentru întrebări (26-33):**
+
+| # | Întrebare | Răspuns |
+|---|---|---|
+| 26 | Wo arbeitet Peter? | **b** — Bei einer großen IT-Firma |
+| 27 | Warum hat Peter gewechselt? | **a** — Wegen besseren Gehalts und besserer Stimmung |
+| 28 | Wie viele Tage Homeoffice? | **c** — 3 Tage |
+| 29 | Was empfiehlt Peter Anna? | **b** — Mit ihrem Chef zu sprechen |
+| 30 | Anna ist mit Job zufrieden? | **F** — stressig |
+| 31 | Peter verdient mai mult? | **R** — „viel besser" |
+| 32 | Anna will sofort kündigen? | **F** — „kündigen will ich noch nicht" |
+| 33 | Treffen sich wieder? | **R** — „nächste Woche wieder treffen" |
 
 ---
 
-## 🎙️ Textul Audio 2 — Anunț la radio (`02-monolog.mp3`)
-
-**Instrucțiuni:** Ton de prezentator radio, clar și entuziast. Ritm normal.
-
-```
-Sind Sie auf der Suche nach einem neuen Job? Dann sind Sie bei der Agentur „JobStar" genau richtig!
-
-JobStar hilft seit 15 Jahren Erwachsenen aus ganz Europa, ihren Traumberuf zu finden. Wir arbeiten mit Firmen aus Deutschland, Österreich, der Schweiz und sogar mit internationalen Unternehmen.
-
-Unsere erste Beratung ist komplett kostenlos! Sie zahlen nichts für das erste Gespräch mit einem unserer Berater.
-
-Sie können sich ganz einfach anmelden — entweder online über unsere Website oder telefonisch unter der Nummer null acht hundert — neun neun neun.
-
-Worauf warten Sie noch? Rufen Sie uns heute an und starten Sie in Ihre neue Karriere!
-```
-
-**Punctele cheie pentru întrebări (20-23):**
-- Întrebarea 20: „JobStar" ajută adulți (NU doar tineri) → răspuns **F (Falsch)**
-- Întrebarea 21: Prima consultație e GRATIS, nu 100€ → răspuns **F (Falsch)**
-- Întrebarea 22: Lucrează cu firme din Germania, Austria, Elveția + internaționale (NU doar Germania) → răspuns **F (Falsch)**
-- Întrebarea 23: Te poți înscrie online sau telefonic → răspuns **R (Richtig)**
-
----
-
-## 📥 Cum încarci MP3-urile
+## 📥 Cum încarci MP3-ul
 
 1. **Web (fără git):** GitHub → repo `examen-b2-german` → folder `test-1/audio/` → „Add file" → „Upload files" → drag-and-drop → commit
-2. **Local:** pune fișierele în `E:\Date Asus\1 Partitia D\CLAUDE IMPORTANT\Claude Code Etomm\examen-b2-german\test-1\audio\` și-mi spui să fac commit + push
+2. **Local:** pune fișierul în `E:\Date Asus\1 Partitia D\CLAUDE IMPORTANT\Claude Code Etomm\examen-b2-german\test-1\audio\` și-mi spui să fac commit + push
 
 ---
 
 ## 💡 Sfaturi pentru înregistrare
 
-- Folosește un microfon decent (chiar și telefonul e ok dacă e într-o cameră liniștită)
-- Înregistrează cu **44.1 kHz, mono, MP3 128 kbps** (suficient pentru voce)
-- Pentru dialog: dacă înregistrezi singură, fă **pauze clare** între replici
-- **Recomandat:** Audacity (gratuit) pentru editare ulterioară
-- Cursantul poate asculta **maxim 2 ori** fiecare audio (limitare programată)
+- Microfon decent (telefonul e ok într-o cameră liniștită)
+- Format: **44.1 kHz, mono, MP3 128 kbps**
+- Pauze clare între replici dacă înregistrezi singură
+- Recomandat: Audacity (gratuit) pentru editare
+- Cursantul poate asculta **maxim 2 ori** (limitare programată)
 
 ---
 
-## ⏱️ Durate optime
+## ⏱️ Durată optimă
 
-- **Audio 1 (dialog):** între **80-110 secunde**
-- **Audio 2 (anunț):** între **45-70 secunde**
-
-Dacă audio-urile sunt prea scurte/lungi, spune-mi și ajustez textul.
+Audio dialog: între **85-110 secunde**.

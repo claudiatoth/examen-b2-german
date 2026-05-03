@@ -1,33 +1,27 @@
 // ============================================================
-// EXAMEN B2 - RECEPTIE RĂSPUNSURI CURSANȚI
+// EXAMEN B2 - RECEPTIE RĂSPUNSURI CURSANȚI + SCOR AUTOMAT
 // Claudia Toth · etommlearning@gmail.com
-// Versiune standalone: creează singur Sheet-ul prima dată
+// Versiune: include scor automat (10 oficiu + Grammatik + Hörverstehen + Leseverstehen)
+// Sprechen rămâne completat manual de examinator în Sheet
 // ============================================================
 
 const NOTIFY_EMAIL = 'etommlearning@gmail.com';
 const SECRET_TOKEN = 'CT-EXAMEN-B2-2026-X9K3M7';
 const SHEET_NAME = 'Examen B2 - Răspunsuri Cursanți';
 
-// Returnează (sau creează) Sheet-ul de salvare
 function getSheet() {
   const props = PropertiesService.getScriptProperties();
   let sheetId = props.getProperty('SHEET_ID');
   let ss;
 
   if (sheetId) {
-    try {
-      ss = SpreadsheetApp.openById(sheetId);
-    } catch (e) {
-      ss = null;
-    }
+    try { ss = SpreadsheetApp.openById(sheetId); } catch (e) { ss = null; }
   }
-
   if (!ss) {
     ss = SpreadsheetApp.create(SHEET_NAME);
     props.setProperty('SHEET_ID', ss.getId());
     Logger.log('Sheet creat: ' + ss.getUrl());
   }
-
   return ss.getActiveSheet();
 }
 
@@ -42,10 +36,19 @@ function doPost(e) {
     }
 
     const sheet = getSheet();
+    const score = payload.score || {};
 
-    const baseHeaders = ['Data trimitere', 'Test', 'Nume', 'Prenume', 'Timp folosit'];
+    // Coloane fixe în ordine:
+    // metadata + scor (in fata, vizibil rapid) + raspunsuri detaliate
+    const baseHeaders = [
+      'Data trimitere', 'Test', 'Nume', 'Prenume', 'Timp folosit',
+      'Oficiu', 'Grammatik (/30)', 'Hörverstehen (/20)', 'Leseverstehen (/25)',
+      'Sprechen (/15) — manual',
+      'TOTAL AUTO (/85)', 'Procent auto', 'TOTAL FINAL (/100) — completat manual', 'Promovat?'
+    ];
+
     const sortKeys = (keys) => keys.sort((a, b) => {
-      const order = { g: 1, h: 2, l: 3 };
+      const order = { g: 1, o: 2, h: 3, l: 4 };
       const aSec = order[a[0]] || 99;
       const bSec = order[b[0]] || 99;
       if (aSec !== bSec) return aSec - bSec;
@@ -53,7 +56,6 @@ function doPost(e) {
     });
 
     if (sheet.getLastRow() === 0) {
-      // Sheet gol → creează antetele complete cu toate cheile
       const answerKeys = sortKeys(Object.keys(payload.answers || {}));
       const headers = baseHeaders.concat(answerKeys);
       sheet.appendRow(headers);
@@ -61,14 +63,14 @@ function doPost(e) {
       headerRange.setFontWeight('bold').setBackground('#10B981').setFontColor('#FFFFFF');
       sheet.setFrozenRows(1);
     } else {
-      // Sheet existent → verifică dacă există chei noi care lipsesc din antet
+      // Auto-extend antet — adaugă chei noi care nu există
       const existingHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-      const newKeys = Object.keys(payload.answers || {}).filter(k => existingHeaders.indexOf(k) === -1);
-      if (newKeys.length > 0) {
-        const sortedNew = sortKeys(newKeys);
+      const allNew = baseHeaders.concat(Object.keys(payload.answers || {}));
+      const missing = allNew.filter(k => existingHeaders.indexOf(k) === -1);
+      if (missing.length > 0) {
         const startCol = sheet.getLastColumn() + 1;
-        sheet.getRange(1, startCol, 1, sortedNew.length).setValues([sortedNew]);
-        const newRange = sheet.getRange(1, startCol, 1, sortedNew.length);
+        sheet.getRange(1, startCol, 1, missing.length).setValues([missing]);
+        const newRange = sheet.getRange(1, startCol, 1, missing.length);
         newRange.setFontWeight('bold').setBackground('#10B981').setFontColor('#FFFFFF');
       }
     }
@@ -80,21 +82,47 @@ function doPost(e) {
       if (h === 'Nume') return payload.cursantNume || '';
       if (h === 'Prenume') return payload.cursantPrenume || '';
       if (h === 'Timp folosit') return payload.timeUsed || '';
+      if (h === 'Oficiu') return score.oficiu != null ? score.oficiu : '';
+      if (h === 'Grammatik (/30)') return score.grammatik != null ? score.grammatik : '';
+      if (h === 'Hörverstehen (/20)') return score.hoerverstehen != null ? score.hoerverstehen : '';
+      if (h === 'Leseverstehen (/25)') return score.leseverstehen != null ? score.leseverstehen : '';
+      if (h === 'Sprechen (/15) — manual') return '';  // se completează manual
+      if (h === 'TOTAL AUTO (/85)') return score.totalAuto != null ? score.totalAuto : '';
+      if (h === 'Procent auto') return score.procentAuto != null ? (score.procentAuto + '%') : '';
+      if (h === 'TOTAL FINAL (/100) — completat manual') return '';
+      if (h === 'Promovat?') return '';
       return (payload.answers && payload.answers[h]) ? payload.answers[h] : '';
     });
     sheet.appendRow(row);
 
-    const subject = '[Examen B2] Submit nou: ' + (payload.test || 'Test necunoscut');
+    // Email pentru examinator (cu scor)
+    const subject = '[Examen B2] Submit nou: ' + (payload.cursantNume || '?') + ' ' + (payload.cursantPrenume || '?');
+    let scoreSection = '';
+    if (score && score.totalAuto != null) {
+      scoreSection =
+        '\n========= SCOR AUTOMAT =========\n' +
+        '  Din oficiu:       ' + score.oficiu + ' / 10\n' +
+        '  Grammatik:        ' + score.grammatik + ' / ' + score.grammatikMax + '\n' +
+        '  Hörverstehen:     ' + score.hoerverstehen + ' / ' + score.hoerverstehenMax + '\n' +
+        '  Leseverstehen:    ' + score.leseverstehen + ' / ' + score.leseverstehenMax + '\n' +
+        '  ───────────────────────────────\n' +
+        '  TOTAL AUTO:       ' + score.totalAuto + ' / 85 (' + score.procentAuto + '%)\n' +
+        '\n  Sprechen (oral):  __ / 15  ← completează manual după proba orală\n' +
+        '  TOTAL FINAL:      __ / 100  ← TOTAL AUTO + Sprechen\n' +
+        '  Prag promovare:   60 / 100\n';
+    }
+
     const body =
       'Un cursant a trimis examenul B2.\n\n' +
       'Test: ' + (payload.test || '-') + '\n' +
       'Nume: ' + (payload.cursantNume || '(necompletat)') + '\n' +
       'Prenume: ' + (payload.cursantPrenume || '(necompletat)') + '\n' +
       'Data: ' + new Date().toLocaleString('ro-RO') + '\n' +
-      'Timp folosit: ' + (payload.timeUsed || '-') + '\n\n' +
-      'Răspunsurile complete sunt în Google Sheet:\n' +
+      'Timp folosit: ' + (payload.timeUsed || '-') + '\n' +
+      scoreSection +
+      '\nRăspunsurile complete + scorul detaliat sunt în Google Sheet:\n' +
       sheet.getParent().getUrl() + '\n\n' +
-      'Vezi și fișierul JSON atașat.\n\n' +
+      'Vezi și fișierul JSON atașat (cu detalii pe fiecare item).\n\n' +
       'ʚଓ Claudia Toth · Curs autorizat ANC';
 
     const jsonAttachment = Utilities.newBlob(
@@ -121,7 +149,7 @@ function doPost(e) {
   }
 }
 
-// Rulează asta o dată ca să creezi Sheet-ul + să testezi că merge
+// Test rapid în editor
 function testFunction() {
   const fakeEvent = {
     postData: {
@@ -131,7 +159,16 @@ function testFunction() {
         cursantNume: 'Test',
         cursantPrenume: 'Cursant',
         timeUsed: '45:30',
-        answers: { g1: 'denn', g2: 'weil', h1: 'b', l1: 'b' }
+        answers: { g1: 'denn', g2: 'weil', h1: 'c', l1: 'b' },
+        score: {
+          oficiu: 10,
+          grammatik: 22, grammatikMax: 30,
+          hoerverstehen: 16, hoerverstehenMax: 20,
+          leseverstehen: 18, leseverstehenMax: 25,
+          sprechen: null, sprechenMax: 15,
+          totalAuto: 66, totalAutoMax: 85,
+          totalPotential: 100, procentAuto: 78
+        }
       })
     }
   };

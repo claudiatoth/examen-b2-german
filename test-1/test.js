@@ -2,19 +2,128 @@
 // EXAMEN B2 - TEST 1 (Arbeit & Beruf)
 // Claudia Toth · Curs autorizat ANC · © 2026
 // IMPORTANT: cursantul NU vede răspunsurile corecte sau scorul!
-// Toate răspunsurile sunt salvate în localStorage pentru recuperare în caz de refresh.
+// Răspunsurile + scorul automat sunt trimise la examinator (email + Sheet).
+// Sprechen e cotat manual (oral) — nu intră în scorul automat.
 // ============================================
 
 const TEST_ID = 'examen-b2-test-1';
-const TEST_DURATION_SECONDS = 60 * 60; // 60 minute
-const MAX_AUDIO_PLAYS = 2; // fiecare audio poate fi ascultat de cel mult 2 ori
+const TEST_DURATION_SECONDS = 60 * 60;
+const MAX_AUDIO_PLAYS = 2;
 
-// Endpoint Google Apps Script (primește răspunsurile + trimite email + salvează în Sheet)
 const SUBMIT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyKx7lFeOajnwA9HKQ03gnu_pWoT7c_jyq9XY8KfvrBE_GJIyANIBP7FB-VNp39tqRM/exec';
 const SUBMIT_TOKEN = 'CT-EXAMEN-B2-2026-X9K3M7';
 
 // ============================================
-// TIMER (60 min)
+// GRILA DE CORECTARE — toate răspunsurile corecte
+// ============================================
+// Punctaj total: 100 = 10 oficiu + 30 Grammatik + 20 Hörverstehen + 25 Leseverstehen + 15 Sprechen (manual)
+// Auto-scor maxim: 85p (oficiu + Grammatik + Hörverstehen + Leseverstehen)
+// Sprechen rămâne 15p, completat manual de examinator
+const ANSWER_KEY = {
+    // ---- A. Konnektoren (5 × 1p = 5p) ----
+    g1: { correct: ['denn'], points: 1 },
+    g2: { correct: ['weil'], points: 1 },
+    g3: { correct: ['aber'], points: 1 },
+    g4: { correct: ['wenn'], points: 1 },
+    g5: { correct: ['deshalb'], points: 1 },
+
+    // ---- B. Prepoziții (5 × 1p = 5p) ----
+    g6:  { correct: ['b'], points: 1 },  // bei
+    g7:  { correct: ['a'], points: 1 },  // mit
+    g8:  { correct: ['a'], points: 1 },  // für
+    g9:  { correct: ['c'], points: 1 },  // von
+    g10: { correct: ['a'], points: 1 },  // in
+
+    // ---- C. Aktiv → Passiv (5 × 2p = 10p) ----
+    // Acceptăm variantele cu „von der/dem ..." sau fără
+    g11: { correct: [
+        'zehn neue mitarbeiter werden von der firma eingestellt',
+        'zehn neue mitarbeiter werden eingestellt'
+    ], points: 2 },
+    g12: { correct: [
+        'das meeting wird vom manager organisiert',
+        'das meeting wird organisiert'
+    ], points: 2 },
+    g13: { correct: [
+        'der bericht wird von der sekretärin geschrieben',
+        'der bericht wird von der sekretaerin geschrieben',
+        'der bericht wird geschrieben'
+    ], points: 2 },
+    g14: { correct: [
+        'die regel wird vom lehrer erklärt',
+        'die regel wird vom lehrer erklaert',
+        'die regel wird erklärt',
+        'die regel wird erklaert'
+    ], points: 2 },
+    g15: { correct: [
+        'das brot wird von der mutter gekauft',
+        'das brot wird gekauft'
+    ], points: 2 },
+
+    // ---- D. Rechtschreibung — alegere (5 × 1p = 5p) ----
+    o1: { correct: ['b'], points: 1 },  // Straße
+    o2: { correct: ['b'], points: 1 },  // Liebe
+    o3: { correct: ['c'], points: 1 },  // schön
+    o4: { correct: ['b'], points: 1 },  // wohnen
+    o5: { correct: ['a'], points: 1 },  // Freund
+
+    // ---- E. Găsește greșeala — rescrie corect (5 × 1p = 5p) ----
+    o6:  { correct: ['arbeit'], wrong: 'arbeit', right: 'Arbeit', points: 1 },        // substantiv cu literă mare
+    o7:  { correct: ['gut'], wrong: 'Gut', right: 'gut', points: 1 },                 // adjectiv cu literă mică
+    o8:  { correct: ['freunde'], wrong: 'freunde', right: 'Freunde', points: 1 },     // substantiv cu literă mare
+    o9:  { correct: ['schnell'], wrong: 'Schnell', right: 'schnell', points: 1 },     // adjectiv cu literă mică
+    o10: { correct: ['große'], wrong: 'grosse', right: 'große', points: 1 },          // ß în loc de ss
+
+    // ---- 2. Hörverstehen ----
+    // h1-h4 (multiple choice, 4 × 3p = 12p)
+    h1: { correct: ['b'], points: 3 },
+    h2: { correct: ['a'], points: 3 },
+    h3: { correct: ['c'], points: 3 },
+    h4: { correct: ['b'], points: 3 },
+    // h5-h8 (Richtig/Falsch, 4 × 2p = 8p)
+    h5: { correct: ['F'], points: 2 },
+    h6: { correct: ['R'], points: 2 },
+    h7: { correct: ['F'], points: 2 },
+    h8: { correct: ['R'], points: 2 },
+
+    // ---- 3. Leseverstehen ----
+    // l1-l5 (multiple choice, 5 × 3p = 15p)
+    l1: { correct: ['b'], points: 3 },
+    l2: { correct: ['b'], points: 3 },
+    l3: { correct: ['b'], points: 3 },
+    l4: { correct: ['b'], points: 3 },
+    l5: { correct: ['b'], points: 3 },
+    // l6-l10 (răspuns scurt, 5 × 2p = 10p)
+    l6:  { correct: ['homeoffice'], points: 2 },
+    l7:  { correct: ['island'], points: 2 },
+    l8:  { correct: [
+        'einen separaten arbeitsplatz',
+        'separaten arbeitsplatz',
+        'einen separaten arbeitsplatz im haus',
+        'separaten arbeitsplatz im haus'
+    ], points: 2 },
+    l9:  { correct: ['4', 'vier'], points: 2 },
+    l10: { correct: [
+        'im handel',
+        'in der gastronomie',
+        'handel',
+        'gastronomie',
+        'im handel und in der gastronomie',
+        'handel und gastronomie',
+        'im handel oder in der gastronomie'
+    ], points: 2 }
+};
+
+const SECTIONS = {
+    grammatik: ['g1','g2','g3','g4','g5','g6','g7','g8','g9','g10','g11','g12','g13','g14','g15','o1','o2','o3','o4','o5','o6','o7','o8','o9','o10'],
+    hoerverstehen: ['h1','h2','h3','h4','h5','h6','h7','h8'],
+    leseverstehen: ['l1','l2','l3','l4','l5','l6','l7','l8','l9','l10']
+};
+
+const SECTION_MAX = { grammatik: 30, hoerverstehen: 20, leseverstehen: 25, sprechen: 15, oficiu: 10 };
+
+// ============================================
+// TIMER
 // ============================================
 let secondsLeft = TEST_DURATION_SECONDS;
 let timerInterval = null;
@@ -30,27 +139,21 @@ function startTimer() {
     timerInterval = setInterval(() => {
         secondsLeft--;
         if (display) display.textContent = formatTime(secondsLeft);
-        // schimbă culoarea când rămân < 10 min
-        if (secondsLeft <= 600 && display) {
-            display.style.color = '#fef3c7';
-        }
-        if (secondsLeft <= 60 && display) {
-            display.style.color = '#fee2e2';
-        }
+        if (secondsLeft <= 600 && display) display.style.color = '#fef3c7';
+        if (secondsLeft <= 60 && display) display.style.color = '#fee2e2';
         if (secondsLeft <= 0) {
             clearInterval(timerInterval);
             alert('Timpul a expirat! Examenul se trimite automat.');
             submitExam();
         }
-        // auto-save la fiecare 5 secunde
         if (secondsLeft % 5 === 0) saveAnswers();
     }, 1000);
 }
 
 // ============================================
-// AUDIO — limitare la 2 ascultări per audio
+// AUDIO
 // ============================================
-const audioPlayCount = { 'audio-1': 0, 'audio-2': 0 };
+const audioPlayCount = { 'audio-1': 0 };
 
 function playAudio(audioId) {
     const audio = document.getElementById(audioId);
@@ -86,15 +189,13 @@ function updatePlaysLeft(audioId) {
 }
 
 // ============================================
-// SAVE / LOAD răspunsuri (localStorage)
+// SAVE / LOAD
 // ============================================
 function collectAnswers() {
     const answers = {};
-    // Inputuri text
     document.querySelectorAll('input[type="text"]').forEach(inp => {
         if (inp.name) answers[inp.name] = inp.value.trim();
     });
-    // Radio
     document.querySelectorAll('input[type="radio"]:checked').forEach(rad => {
         answers[rad.name] = rad.value;
     });
@@ -103,15 +204,9 @@ function collectAnswers() {
 
 function saveAnswers() {
     try {
-        const data = {
-            timestamp: new Date().toISOString(),
-            secondsLeft: secondsLeft,
-            answers: collectAnswers()
-        };
+        const data = { timestamp: new Date().toISOString(), secondsLeft: secondsLeft, answers: collectAnswers() };
         localStorage.setItem(TEST_ID, JSON.stringify(data));
-    } catch (e) {
-        console.log('Nu s-au putut salva răspunsurile:', e);
-    }
+    } catch (e) { console.log('Save error:', e); }
 }
 
 function loadAnswers() {
@@ -120,24 +215,85 @@ function loadAnswers() {
         if (!raw) return;
         const data = JSON.parse(raw);
         if (!data.answers) return;
-        // restore text
         Object.keys(data.answers).forEach(name => {
             const txt = document.querySelector(`input[type="text"][name="${name}"]`);
             if (txt) { txt.value = data.answers[name]; return; }
             const rad = document.querySelector(`input[type="radio"][name="${name}"][value="${data.answers[name]}"]`);
             if (rad) rad.checked = true;
         });
-    } catch (e) {
-        console.log('Eroare load:', e);
-    }
+    } catch (e) { console.log('Load error:', e); }
 }
 
 // ============================================
-// SUBMIT — pas 1: deschide modalul de identificare
+// CALCUL SCOR AUTOMAT
+// ============================================
+function normalize(s) {
+    return (s || '').toString().trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.,;:!?]+$/g, '');
+}
+
+function isCorrect(itemKey, userValue) {
+    const item = ANSWER_KEY[itemKey];
+    if (!item) return false;
+    const userNorm = normalize(userValue);
+    if (!userNorm) return false;
+    return item.correct.some(c => normalize(c) === userNorm);
+}
+
+function computeScore(answers) {
+    const detail = { grammatik: { correct: 0, total: 0, items: {} }, hoerverstehen: { correct: 0, total: 0, items: {} }, leseverstehen: { correct: 0, total: 0, items: {} } };
+    let scoreGrammatik = 0, scoreHoeren = 0, scoreLesen = 0;
+
+    SECTIONS.grammatik.forEach(k => {
+        const ok = isCorrect(k, answers[k]);
+        const pts = ok ? ANSWER_KEY[k].points : 0;
+        scoreGrammatik += pts;
+        detail.grammatik.total += ANSWER_KEY[k].points;
+        if (ok) detail.grammatik.correct += 1;
+        detail.grammatik.items[k] = { answer: answers[k] || '', correct: ok, points: pts, max: ANSWER_KEY[k].points };
+    });
+    SECTIONS.hoerverstehen.forEach(k => {
+        const ok = isCorrect(k, answers[k]);
+        const pts = ok ? ANSWER_KEY[k].points : 0;
+        scoreHoeren += pts;
+        detail.hoerverstehen.total += ANSWER_KEY[k].points;
+        if (ok) detail.hoerverstehen.correct += 1;
+        detail.hoerverstehen.items[k] = { answer: answers[k] || '', correct: ok, points: pts, max: ANSWER_KEY[k].points };
+    });
+    SECTIONS.leseverstehen.forEach(k => {
+        const ok = isCorrect(k, answers[k]);
+        const pts = ok ? ANSWER_KEY[k].points : 0;
+        scoreLesen += pts;
+        detail.leseverstehen.total += ANSWER_KEY[k].points;
+        if (ok) detail.leseverstehen.correct += 1;
+        detail.leseverstehen.items[k] = { answer: answers[k] || '', correct: ok, points: pts, max: ANSWER_KEY[k].points };
+    });
+
+    const oficiu = SECTION_MAX.oficiu;
+    const totalAuto = oficiu + scoreGrammatik + scoreHoeren + scoreLesen;  // max 85
+    return {
+        oficiu: oficiu,
+        grammatik: scoreGrammatik,
+        grammatikMax: SECTION_MAX.grammatik,
+        hoerverstehen: scoreHoeren,
+        hoerverstehenMax: SECTION_MAX.hoerverstehen,
+        leseverstehen: scoreLesen,
+        leseverstehenMax: SECTION_MAX.leseverstehen,
+        sprechen: null,  // completat manual de examinator
+        sprechenMax: SECTION_MAX.sprechen,
+        totalAuto: totalAuto,           // 10 + Gramm + Hör + Lesen
+        totalAutoMax: 85,
+        totalPotential: 100,
+        procentAuto: Math.round((totalAuto / 85) * 100),
+        detail: detail
+    };
+}
+
+// ============================================
+// SUBMIT
 // ============================================
 function submitExam() {
     const answers = collectAnswers();
-    const totalQuestions = 33;
+    const totalQuestions = SECTIONS.grammatik.length + SECTIONS.hoerverstehen.length + SECTIONS.leseverstehen.length;
     const answeredCount = Object.values(answers).filter(v => v && v.length > 0).length;
 
     if (answeredCount < totalQuestions) {
@@ -145,7 +301,6 @@ function submitExam() {
         if (!proceed) return;
     }
 
-    // Deschide modal pentru nume + prenume
     const modal = document.getElementById('identity-modal');
     modal.style.display = 'flex';
     setTimeout(() => {
@@ -158,7 +313,6 @@ function cancelSubmit() {
     document.getElementById('identity-modal').style.display = 'none';
 }
 
-// SUBMIT — pas 2: după ce a confirmat din modal, trimite efectiv
 async function confirmSubmit() {
     const numeInput = document.getElementById('modal-nume');
     const prenumeInput = document.getElementById('modal-prenume');
@@ -178,6 +332,8 @@ async function confirmSubmit() {
     saveAnswers();
     if (timerInterval) clearInterval(timerInterval);
 
+    const score = computeScore(answers);
+
     const submission = {
         token: SUBMIT_TOKEN,
         test: 'Test 1 — Arbeit & Beruf',
@@ -185,10 +341,10 @@ async function confirmSubmit() {
         cursantPrenume: prenume,
         submittedAt: new Date().toLocaleString('ro-RO'),
         timeUsed: formatTime(TEST_DURATION_SECONDS - secondsLeft),
-        answers: answers
+        answers: answers,
+        score: score
     };
 
-    // Închide modalul, arată "se trimite..."
     document.getElementById('identity-modal').style.display = 'none';
     const submitBtn = document.querySelector('.submit-btn');
     if (submitBtn) {
@@ -210,9 +366,11 @@ async function confirmSubmit() {
         success = false;
     }
 
-    // Backup local
+    // Backup local — fără scor (cursantul nu trebuie să-l vadă)
     try {
-        const blob = new Blob([JSON.stringify(submission, null, 2)], { type: 'application/json' });
+        const cursantBackup = { ...submission };
+        delete cursantBackup.score;
+        const blob = new Blob([JSON.stringify(cursantBackup, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -222,9 +380,7 @@ async function confirmSubmit() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-    } catch (e) {
-        console.log('Download error:', e);
-    }
+    } catch (e) { console.log('Download error:', e); }
 
     document.getElementById('exam-content').style.display = 'none';
     document.getElementById('submitted').style.display = 'block';
@@ -237,15 +393,9 @@ async function confirmSubmit() {
     }
 }
 
-// ============================================
-// PROTECȚII suplimentare
-// - Avertizare la închiderea paginii dacă au răspunsuri
-// - Save automat la fiecare schimbare
-// ============================================
 window.addEventListener('beforeunload', (e) => {
     const ans = collectAnswers();
     const filled = Object.values(ans).filter(v => v && v.length > 0).length;
-    // dacă a apăsat submit, nu mai avertizăm
     if (filled > 0 && document.getElementById('submitted').style.display !== 'block') {
         e.preventDefault();
         e.returnValue = '';
@@ -255,7 +405,6 @@ window.addEventListener('beforeunload', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
     loadAnswers();
     startTimer();
-    // auto-save la fiecare schimbare
     document.querySelectorAll('input').forEach(inp => {
         inp.addEventListener('change', saveAnswers);
         inp.addEventListener('blur', saveAnswers);
