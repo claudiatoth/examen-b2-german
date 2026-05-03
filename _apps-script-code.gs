@@ -1,8 +1,8 @@
 // ============================================================
 // EXAMEN B2 - RECEPTIE RĂSPUNSURI CURSANȚI + SCOR AUTOMAT
 // Claudia Toth · etommlearning@gmail.com
-// Versiune: include scor automat (10 oficiu + Grammatik + Hörverstehen + Leseverstehen)
-// Sprechen rămâne completat manual de examinator în Sheet
+// VERSIUNEA DEFENSIVĂ — capturează erori la fiecare pas și
+// trimite email cu detalii chiar dacă o parte eșuează.
 // ============================================================
 
 const NOTIFY_EMAIL = 'etommlearning@gmail.com';
@@ -13,143 +13,158 @@ function getSheet() {
   const props = PropertiesService.getScriptProperties();
   let sheetId = props.getProperty('SHEET_ID');
   let ss;
-
   if (sheetId) {
     try { ss = SpreadsheetApp.openById(sheetId); } catch (e) { ss = null; }
   }
   if (!ss) {
     ss = SpreadsheetApp.create(SHEET_NAME);
     props.setProperty('SHEET_ID', ss.getId());
-    Logger.log('Sheet creat: ' + ss.getUrl());
   }
   return ss.getActiveSheet();
 }
 
-function doPost(e) {
+function safeMail(subject, body, attachment) {
   try {
-    const payload = JSON.parse(e.postData.contents);
+    const opts = { to: NOTIFY_EMAIL, subject: subject, body: body };
+    if (attachment) opts.attachments = [attachment];
+    MailApp.sendEmail(opts);
+  } catch (e) {
+    // ignorăm — nu vrem să crashuim totul dacă mailul eșuează
+  }
+}
 
+function doPost(e) {
+  let stage = 'init';
+  let payload = null;
+
+  try {
+    // ---- 1. Parse payload ----
+    stage = 'parse';
+    payload = JSON.parse(e.postData.contents);
+
+    // ---- 2. Verificare token ----
+    stage = 'token';
     if (payload.token !== SECRET_TOKEN) {
       return ContentService
         .createTextOutput(JSON.stringify({ status: 'error', message: 'Invalid token' }))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+    // ---- 3. Acces sheet ----
+    stage = 'sheet';
     const sheet = getSheet();
     const score = payload.score || {};
+    const answers = payload.answers || {};
 
-    // Coloane fixe în ordine:
-    // metadata + scor (in fata, vizibil rapid) + raspunsuri detaliate
-    const baseHeaders = [
-      'Data trimitere', 'Test', 'Nume', 'Prenume', 'Timp folosit',
-      'Oficiu', 'Grammatik (/30)', 'Hörverstehen (/20)', 'Leseverstehen (/25)',
-      'Sprechen (/15) — manual',
-      'TOTAL AUTO (/85)', 'Procent auto', 'TOTAL FINAL (/100) — completat manual', 'Promovat?'
+    // ---- 4. Salvare row simplu (fail-safe) ----
+    // Adăugăm un row JSON brut în coloana A ca backup garantat,
+    // chiar dacă orice altceva eșuează. Așa nu pierdem submitul.
+    stage = 'backup-row';
+    const backupRow = [
+      new Date(),
+      payload.test || '',
+      payload.cursantNume || '',
+      payload.cursantPrenume || '',
+      payload.timeUsed || '',
+      score.oficiu != null ? score.oficiu : '',
+      score.grammatik != null ? score.grammatik : '',
+      score.hoerverstehen != null ? score.hoerverstehen : '',
+      score.leseverstehen != null ? score.leseverstehen : '',
+      '',  // Sprechen manual
+      score.totalAuto != null ? score.totalAuto : '',
+      score.procentAuto != null ? (score.procentAuto + '%') : '',
+      '',  // Total final manual
+      '',  // Promovat manual
+      JSON.stringify(answers)  // toate răspunsurile ca JSON într-o singură celulă
     ];
 
-    const sortKeys = (keys) => keys.sort((a, b) => {
-      const order = { g: 1, o: 2, h: 3, l: 4 };
-      const aSec = order[a[0]] || 99;
-      const bSec = order[b[0]] || 99;
-      if (aSec !== bSec) return aSec - bSec;
-      return parseInt(a.slice(1)) - parseInt(b.slice(1));
-    });
-
+    // Dacă e primul rând: scriem antetele
+    stage = 'header-check';
     if (sheet.getLastRow() === 0) {
-      const answerKeys = sortKeys(Object.keys(payload.answers || {}));
-      const headers = baseHeaders.concat(answerKeys);
+      const headers = [
+        'Data trimitere', 'Test', 'Nume', 'Prenume', 'Timp folosit',
+        'Oficiu', 'Grammatik (/30)', 'Hörverstehen (/20)', 'Leseverstehen (/25)',
+        'Sprechen (/15) — manual',
+        'TOTAL AUTO (/85)', 'Procent auto', 'TOTAL FINAL (/100)', 'Promovat?',
+        'Răspunsuri (JSON)'
+      ];
       sheet.appendRow(headers);
-      const headerRange = sheet.getRange(1, 1, 1, headers.length);
-      headerRange.setFontWeight('bold').setBackground('#10B981').setFontColor('#FFFFFF');
-      sheet.setFrozenRows(1);
-    } else {
-      // Auto-extend antet — adaugă chei noi care nu există
-      const existingHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-      const allNew = baseHeaders.concat(Object.keys(payload.answers || {}));
-      const missing = allNew.filter(k => existingHeaders.indexOf(k) === -1);
-      if (missing.length > 0) {
-        const startCol = sheet.getLastColumn() + 1;
-        sheet.getRange(1, startCol, 1, missing.length).setValues([missing]);
-        const newRange = sheet.getRange(1, startCol, 1, missing.length);
-        newRange.setFontWeight('bold').setBackground('#10B981').setFontColor('#FFFFFF');
-      }
+      try {
+        const r = sheet.getRange(1, 1, 1, headers.length);
+        r.setFontWeight('bold').setBackground('#10B981').setFontColor('#FFFFFF');
+        sheet.setFrozenRows(1);
+      } catch (fmtErr) {}
     }
 
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-    const row = headers.map(h => {
-      if (h === 'Data trimitere') return new Date();
-      if (h === 'Test') return payload.test || '';
-      if (h === 'Nume') return payload.cursantNume || '';
-      if (h === 'Prenume') return payload.cursantPrenume || '';
-      if (h === 'Timp folosit') return payload.timeUsed || '';
-      if (h === 'Oficiu') return score.oficiu != null ? score.oficiu : '';
-      if (h === 'Grammatik (/30)') return score.grammatik != null ? score.grammatik : '';
-      if (h === 'Hörverstehen (/20)') return score.hoerverstehen != null ? score.hoerverstehen : '';
-      if (h === 'Leseverstehen (/25)') return score.leseverstehen != null ? score.leseverstehen : '';
-      if (h === 'Sprechen (/15) — manual') return '';  // se completează manual
-      if (h === 'TOTAL AUTO (/85)') return score.totalAuto != null ? score.totalAuto : '';
-      if (h === 'Procent auto') return score.procentAuto != null ? (score.procentAuto + '%') : '';
-      if (h === 'TOTAL FINAL (/100) — completat manual') return '';
-      if (h === 'Promovat?') return '';
-      return (payload.answers && payload.answers[h]) ? payload.answers[h] : '';
-    });
-    sheet.appendRow(row);
+    stage = 'append-row';
+    sheet.appendRow(backupRow);
 
-    // Email pentru examinator (cu scor)
+    // ---- 5. Email cu scor ----
+    stage = 'email';
     const subject = '[Examen B2] Submit nou: ' + (payload.cursantNume || '?') + ' ' + (payload.cursantPrenume || '?');
     let scoreSection = '';
     if (score && score.totalAuto != null) {
       scoreSection =
         '\n========= SCOR AUTOMAT =========\n' +
         '  Din oficiu:       ' + score.oficiu + ' / 10\n' +
-        '  Grammatik:        ' + score.grammatik + ' / ' + score.grammatikMax + '\n' +
-        '  Hörverstehen:     ' + score.hoerverstehen + ' / ' + score.hoerverstehenMax + '\n' +
-        '  Leseverstehen:    ' + score.leseverstehen + ' / ' + score.leseverstehenMax + '\n' +
-        '  ───────────────────────────────\n' +
+        '  Grammatik:        ' + score.grammatik + ' / ' + (score.grammatikMax || 30) + '\n' +
+        '  Hörverstehen:     ' + score.hoerverstehen + ' / ' + (score.hoerverstehenMax || 20) + '\n' +
+        '  Leseverstehen:    ' + score.leseverstehen + ' / ' + (score.leseverstehenMax || 25) + '\n' +
+        '  --------------------------------\n' +
         '  TOTAL AUTO:       ' + score.totalAuto + ' / 85 (' + score.procentAuto + '%)\n' +
-        '\n  Sprechen (oral):  __ / 15  ← completează manual după proba orală\n' +
-        '  TOTAL FINAL:      __ / 100  ← TOTAL AUTO + Sprechen\n' +
+        '\n  Sprechen (oral):  __ / 15\n' +
+        '  TOTAL FINAL:      __ / 100\n' +
         '  Prag promovare:   60 / 100\n';
     }
 
     const body =
       'Un cursant a trimis examenul B2.\n\n' +
       'Test: ' + (payload.test || '-') + '\n' +
-      'Nume: ' + (payload.cursantNume || '(necompletat)') + '\n' +
-      'Prenume: ' + (payload.cursantPrenume || '(necompletat)') + '\n' +
+      'Nume: ' + (payload.cursantNume || '?') + '\n' +
+      'Prenume: ' + (payload.cursantPrenume || '?') + '\n' +
       'Data: ' + new Date().toLocaleString('ro-RO') + '\n' +
       'Timp folosit: ' + (payload.timeUsed || '-') + '\n' +
       scoreSection +
-      '\nRăspunsurile complete + scorul detaliat sunt în Google Sheet:\n' +
+      '\nGoogle Sheet:\n' +
       sheet.getParent().getUrl() + '\n\n' +
-      'Vezi și fișierul JSON atașat (cu detalii pe fiecare item).\n\n' +
-      'ʚଓ Claudia Toth · Curs autorizat ANC';
+      'Vezi si fisierul JSON atasat.\n\n' +
+      'Claudia Toth - Curs autorizat ANC';
 
-    const jsonAttachment = Utilities.newBlob(
-      JSON.stringify(payload, null, 2),
-      'application/json',
-      'raspunsuri-' + (payload.test || 'test').replace(/[^a-z0-9]/gi, '-') + '-' + Date.now() + '.json'
-    );
+    let attachment = null;
+    try {
+      attachment = Utilities.newBlob(
+        JSON.stringify(payload, null, 2),
+        'application/json',
+        'raspunsuri-' + Date.now() + '.json'
+      );
+    } catch (atErr) {}
 
-    MailApp.sendEmail({
-      to: NOTIFY_EMAIL,
-      subject: subject,
-      body: body,
-      attachments: [jsonAttachment]
-    });
+    safeMail(subject, body, attachment);
 
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'ok', row: sheet.getLastRow() }))
       .setMimeType(ContentService.MimeType.JSON);
 
   } catch (err) {
+    // ---- ESEC: trimite email cu detalii ----
+    const errMsg = '[Examen B2] EROARE la submit (stage: ' + stage + ')';
+    const errBody =
+      'A aparut o eroare la procesarea unui submit B2.\n\n' +
+      'Stage: ' + stage + '\n' +
+      'Eroare: ' + err.toString() + '\n' +
+      'Stack: ' + (err.stack || '(no stack)') + '\n\n' +
+      'Payload primit:\n' +
+      (payload ? JSON.stringify(payload, null, 2) : '(nu s-a putut parsa)') + '\n';
+
+    safeMail(errMsg, errBody, null);
+
     return ContentService
-      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
+      .createTextOutput(JSON.stringify({ status: 'error', stage: stage, message: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-// Test rapid în editor
+// Test rapid în editor (rulezi din dropdown sus + ▶)
 function testFunction() {
   const fakeEvent = {
     postData: {
@@ -159,7 +174,7 @@ function testFunction() {
         cursantNume: 'Test',
         cursantPrenume: 'Cursant',
         timeUsed: '45:30',
-        answers: { g1: 'denn', g2: 'weil', h1: 'c', l1: 'b' },
+        answers: { g1: 'denn', g2: 'weil', h1: 'b', l1: 'b' },
         score: {
           oficiu: 10,
           grammatik: 22, grammatikMax: 30,
