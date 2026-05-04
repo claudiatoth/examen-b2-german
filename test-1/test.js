@@ -209,12 +209,6 @@ function saveAnswers() {
     } catch (e) { console.log('Save error:', e); }
 }
 
-function resetTest() {
-    if (!confirm('Sigur vrei să reiei testul de la zero? Toate răspunsurile salvate vor fi șterse.')) return;
-    try { localStorage.removeItem(TEST_ID); } catch (e) {}
-    location.reload();
-}
-
 function loadAnswers() {
     try {
         const raw = localStorage.getItem(TEST_ID);
@@ -392,8 +386,13 @@ async function confirmSubmit() {
     document.getElementById('submitted').style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Curățăm localStorage după submit reușit — la următoarea vizită testul pornește gol
-    try { localStorage.removeItem(TEST_ID); } catch (e) {}
+    // LOCK PERMANENT — examenul oficial nu poate fi reluat
+    // Setăm flag persistent + curățăm răspunsurile (rămâne doar flag-ul)
+    try {
+        localStorage.removeItem(TEST_ID);
+        localStorage.setItem(TEST_ID + '-submitted', new Date().toISOString());
+    } catch (e) {}
+
 
     if (!success) {
         setTimeout(() => {
@@ -412,6 +411,16 @@ window.addEventListener('beforeunload', (e) => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Check dacă examenul a fost deja trimis — lock permanent
+    try {
+        if (localStorage.getItem(TEST_ID + '-submitted')) {
+            document.getElementById('exam-content').style.display = 'none';
+            document.getElementById('submitted').style.display = 'block';
+            // Nu pornim timer-ul, nu încărcăm răspunsuri
+            return;
+        }
+    } catch (e) {}
+
     loadAnswers();
     startTimer();
     document.querySelectorAll('input').forEach(inp => {

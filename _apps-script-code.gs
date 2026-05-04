@@ -78,19 +78,30 @@ function doPost(e) {
       JSON.stringify(answers)  // toate răspunsurile ca JSON într-o singură celulă
     ];
 
-    // Dacă e primul rând: scriem antetele
+    // Dacă schema veche (g1, g2... ca antete) sau gol → reset și scrie antetele noi
     stage = 'header-check';
-    if (sheet.getLastRow() === 0) {
-      const headers = [
-        'Data trimitere', 'Test', 'Nume', 'Prenume', 'Timp folosit',
-        'Oficiu', 'Grammatik (/30)', 'Hörverstehen (/20)', 'Leseverstehen (/25)',
-        'Sprechen (/15) — manual',
-        'TOTAL AUTO (/85)', 'Procent auto', 'TOTAL FINAL (/100)', 'Promovat?',
-        'Răspunsuri (JSON)'
-      ];
-      sheet.appendRow(headers);
+    const expectedHeaders = [
+      'Data trimitere', 'Test', 'Nume', 'Prenume', 'Timp folosit',
+      'Oficiu', 'Grammatik (/30)', 'Hörverstehen (/20)', 'Leseverstehen (/25)',
+      'Sprechen (/15) — manual',
+      'TOTAL AUTO (/85)', 'Procent auto', 'TOTAL FINAL (/100)', 'Promovat?',
+      'Răspunsuri (JSON)'
+    ];
+
+    const lastRow = sheet.getLastRow();
+    let needHeaderInit = (lastRow === 0);
+    if (lastRow > 0) {
+      const currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      if (currentHeaders.indexOf('Oficiu') === -1) {
+        // Schema veche detectată → curățăm și recreăm
+        sheet.clear();
+        needHeaderInit = true;
+      }
+    }
+    if (needHeaderInit) {
+      sheet.appendRow(expectedHeaders);
       try {
-        const r = sheet.getRange(1, 1, 1, headers.length);
+        const r = sheet.getRange(1, 1, 1, expectedHeaders.length);
         r.setFontWeight('bold').setBackground('#10B981').setFontColor('#FFFFFF');
         sheet.setFrozenRows(1);
       } catch (fmtErr) {}
