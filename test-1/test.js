@@ -411,6 +411,17 @@ window.addEventListener('beforeunload', (e) => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    // BYPASS ADMIN — pentru profesor: deschide pagina cu ?admin=resetCT2026
+    // → șterge tot localStorage și reîncarcă pagina goală (URL curățat)
+    try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('admin') === 'resetCT2026') {
+            localStorage.clear();
+            window.history.replaceState({}, '', window.location.pathname);
+            // Continuă cu fluxul normal (fără flag → test gol)
+        }
+    } catch (e) {}
+
     // Check dacă examenul a fost deja trimis — lock permanent
     try {
         if (localStorage.getItem(TEST_ID + '-submitted')) {
