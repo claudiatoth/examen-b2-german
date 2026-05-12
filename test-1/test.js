@@ -35,7 +35,8 @@ const ANSWER_KEY = {
     g10: { correct: ['a'], points: 1 },  // in
 
     // ---- C. Aktiv → Passiv (5 × 2p = 10p) ----
-    // Acceptăm variantele cu „von der/dem ..." sau fără
+    // Acceptăm 2 variante CORECTE: cu „von der/vom ..." (Dativ) și fără.
+    // Normalize flex acceptă automat și formele fără diacritice (ä↔ae, ö↔oe, ü↔ue, ß↔ss)
     g11: { correct: [
         'zehn neue mitarbeiter werden von der firma eingestellt',
         'zehn neue mitarbeiter werden eingestellt'
@@ -46,14 +47,11 @@ const ANSWER_KEY = {
     ], points: 2 },
     g13: { correct: [
         'der bericht wird von der sekretärin geschrieben',
-        'der bericht wird von der sekretaerin geschrieben',
         'der bericht wird geschrieben'
     ], points: 2 },
     g14: { correct: [
         'die regel wird vom lehrer erklärt',
-        'die regel wird vom lehrer erklaert',
-        'die regel wird erklärt',
-        'die regel wird erklaert'
+        'die regel wird erklärt'
     ], points: 2 },
     g15: { correct: [
         'das brot wird von der mutter gekauft',
@@ -72,7 +70,7 @@ const ANSWER_KEY = {
     o7:  { correct: ['gut'], wrong: 'Gut', right: 'gut', points: 1 },                 // adjectiv cu literă mică
     o8:  { correct: ['freunde'], wrong: 'freunde', right: 'Freunde', points: 1 },     // substantiv cu literă mare
     o9:  { correct: ['schnell'], wrong: 'Schnell', right: 'schnell', points: 1 },     // adjectiv cu literă mică
-    o10: { correct: ['große'], wrong: 'grosse', right: 'große', points: 1 },          // ß în loc de ss
+    o10: { correct: ['große'], wrong: 'grosse', right: 'große', points: 1, strictUmlaut: true },  // ß în loc de ss — STRICT, nu acceptăm „grosse" (asta testăm!)
 
     // ---- 2. Hörverstehen ----
     // h1-h4 (multiple choice, 4 × 3p = 12p)
@@ -100,7 +98,10 @@ const ANSWER_KEY = {
         'einen separaten arbeitsplatz',
         'separaten arbeitsplatz',
         'einen separaten arbeitsplatz im haus',
-        'separaten arbeitsplatz im haus'
+        'separaten arbeitsplatz im haus',
+        'feste arbeitszeiten und einen separaten arbeitsplatz',
+        'feste arbeitszeiten und separaten arbeitsplatz',
+        'feste arbeitszeiten und einen separaten arbeitsplatz im haus'
     ], points: 2 },
     l9:  { correct: ['4', 'vier'], points: 2 },
     l10: { correct: [
@@ -227,16 +228,23 @@ function loadAnswers() {
 // ============================================
 // CALCUL SCOR AUTOMAT
 // ============================================
-function normalize(s) {
-    return (s || '').toString().trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.,;:!?]+$/g, '');
+// flexUmlaut=true (default) → acceptă AMBELE forme: ß↔ss, ä↔ae, ö↔oe, ü↔ue
+// flexUmlaut=false → strict (folosit la întrebări care testează ortografia ß/umlaute)
+function normalize(s, flexUmlaut = true) {
+    let r = (s || '').toString().trim().toLowerCase();
+    if (flexUmlaut) {
+        r = r.replace(/ß/g, 'ss').replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue');
+    }
+    return r.replace(/\s+/g, ' ').replace(/[.,;:!?]+$/g, '');
 }
 
 function isCorrect(itemKey, userValue) {
     const item = ANSWER_KEY[itemKey];
     if (!item) return false;
-    const userNorm = normalize(userValue);
+    const flex = !item.strictUmlaut;  // dacă item are strictUmlaut=true, nu convertim ß/ä/ö/ü
+    const userNorm = normalize(userValue, flex);
     if (!userNorm) return false;
-    return item.correct.some(c => normalize(c) === userNorm);
+    return item.correct.some(c => normalize(c, flex) === userNorm);
 }
 
 function computeScore(answers) {
