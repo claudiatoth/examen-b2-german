@@ -324,6 +324,39 @@ function doPost(e) {
   }
 }
 
+// ============================================================
+// 🔧 DIAGNOSTIC — rulează ASTA prima dată (NU ascunde erorile)
+// Forțează dialogul de permisiuni + îți trimite linkul pe email.
+// ============================================================
+function verificare() {
+  // Pas 1 — Spreadsheet (cere permisiune Sheets)
+  const ss = getSpreadsheet();
+  const url = ss.getUrl();
+  Logger.log('PAS 1 OK · Spreadsheet URL: ' + url);
+
+  // Pas 2 — creează foaia Test 2 (cere permisiune Sheets)
+  const sheet = getTestSheet(ss, 'Test 2 — Bildung & Studium');
+  Logger.log('PAS 2 OK · Foaia: ' + sheet.getName());
+
+  // Pas 3 — Drive folder (cere permisiune Drive)
+  const folder = getTargetFolder('Test 2');
+  Logger.log('PAS 3 OK · Folder: ' + folder.getName());
+
+  // Pas 4 — Email (cere permisiune Gmail)
+  MailApp.sendEmail(
+    NOTIFY_EMAIL,
+    '[Examen B2] ✅ VERIFICARE reușită — link spreadsheet',
+    'Sistemul funcționează!\n\n' +
+    'Spreadsheet-ul folosit de script:\n' + url + '\n\n' +
+    'Foaia testului: ' + sheet.getName() + '\n' +
+    'Folderul Drive: Examen B2 - Raspunsuri Cursanti / ' + SESIUNE + ' / Test 2\n\n' +
+    'Deschide linkul de mai sus — acolo apar răspunsurile cursanților.\n\n' +
+    'ʚଓ Claudia Toth · Curs autorizat ANC'
+  );
+  Logger.log('PAS 4 OK · Email trimis la ' + NOTIFY_EMAIL);
+  Logger.log('=== TOTUL FUNCȚIONEAZĂ ===');
+}
+
 // Test rapid în editor (rulezi din dropdown sus + ▶)
 function testFunction() {
   const fakeEvent = {
