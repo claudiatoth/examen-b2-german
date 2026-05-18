@@ -1,15 +1,36 @@
 // ============================================================
 // EXAMEN B2 - RECEPTIE RĂSPUNSURI CURSANȚI + SCOR AUTOMAT
 // Claudia Toth · etommlearning@gmail.com
-// VERSIUNEA DEFENSIVĂ — capturează erori la fiecare pas și
-// trimite email cu detalii chiar dacă o parte eșuează.
+// VERSIUNEA 5 (17 mai 2026):
+//   - 1 Google Sheet · TAB (foaie) separat per Test
+//   - coloană "Sesiune" (filtrezi pe sesiunea curentă)
+//   - Google Doc per cursant în foldere ierarhice: {SESIUNE} / {Test}
+//   - labels generice (funcționează pentru toate cele 10 teste)
+//   - logica defensivă păstrată (try/catch pe stages + email pe eroare)
+// ============================================================
+
+// 🔴 SINGURUL LUCRU PE CARE ÎL SCHIMBI LA FIECARE SESIUNE NOUĂ:
+const SESIUNE = 'Iulie 2026';
 // ============================================================
 
 const NOTIFY_EMAIL = 'etommlearning@gmail.com';
 const SECRET_TOKEN = 'CT-EXAMEN-B2-2026-X9K3M7';
 const SHEET_NAME = 'Examen B2 - Răspunsuri Cursanți';
+const DRIVE_FOLDER_NAME = 'Examen B2 - Raspunsuri Cursanti';
 
-function getSheet() {
+// Antetele (16 coloane — am adăugat „Sesiune" pe poziția 2)
+const EXPECTED_HEADERS = [
+  'Data trimitere', 'Sesiune', 'Test', 'Nume', 'Prenume', 'Timp folosit',
+  'Oficiu', 'Grammatik (/30)', 'Hörverstehen (/20)', 'Leseverstehen (/25)',
+  'Sprechen (/15) — manual',
+  'TOTAL AUTO (/85)', 'Procent auto', 'TOTAL FINAL (/100)', 'Promovat?',
+  'Răspunsuri (JSON)'
+];
+
+// ============================================================
+// SPREADSHEET + TAB per test
+// ============================================================
+function getSpreadsheet() {
   const props = PropertiesService.getScriptProperties();
   let sheetId = props.getProperty('SHEET_ID');
   let ss;
@@ -20,7 +41,41 @@ function getSheet() {
     ss = SpreadsheetApp.create(SHEET_NAME);
     props.setProperty('SHEET_ID', ss.getId());
   }
-  return ss.getActiveSheet();
+  return ss;
+}
+
+// Din „Test 2 — Bildung & Studium" → numele tab-ului „Test 2"
+function tabNameFromTest(testStr) {
+  const m = (testStr || '').match(/Test\s*\d+/i);
+  return m ? m[0].replace(/\s+/g, ' ').trim() : 'Diverse';
+}
+
+// Găsește/creează foaia pentru testul respectiv + asigură antetele
+function getTestSheet(ss, testStr) {
+  const tabName = tabNameFromTest(testStr);
+  let sheet = ss.getSheetByName(tabName);
+  if (!sheet) {
+    sheet = ss.insertSheet(tabName);
+  }
+  // Asigură antetele (creează sau repară schema veche fără „Sesiune")
+  const lastRow = sheet.getLastRow();
+  let needHeaderInit = (lastRow === 0);
+  if (lastRow > 0) {
+    const currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    if (currentHeaders.indexOf('Sesiune') === -1) {
+      sheet.clear();
+      needHeaderInit = true;
+    }
+  }
+  if (needHeaderInit) {
+    sheet.appendRow(EXPECTED_HEADERS);
+    try {
+      const r = sheet.getRange(1, 1, 1, EXPECTED_HEADERS.length);
+      r.setFontWeight('bold').setBackground('#10B981').setFontColor('#FFFFFF');
+      sheet.setFrozenRows(1);
+    } catch (fmtErr) {}
+  }
+  return sheet;
 }
 
 function safeMail(subject, body, attachment) {
@@ -28,49 +83,43 @@ function safeMail(subject, body, attachment) {
     const opts = { to: NOTIFY_EMAIL, subject: subject, body: body };
     if (attachment) opts.attachments = [attachment];
     MailApp.sendEmail(opts);
-  } catch (e) {
-    // ignorăm — nu vrem să crashuim totul dacă mailul eșuează
-  }
+  } catch (e) {}
 }
 
 // ============================================================
-// FOLDER + GOOGLE DOC pentru fiecare submit
+// FOLDERE IERARHICE: root / {SESIUNE} / {Test}
 // ============================================================
-const DRIVE_FOLDER_NAME = 'Examen B2 - Raspunsuri Cursanti';
-
-function getOrCreateFolder() {
-  const folders = DriveApp.getFoldersByName(DRIVE_FOLDER_NAME);
-  if (folders.hasNext()) return folders.next();
-  return DriveApp.createFolder(DRIVE_FOLDER_NAME);
+function getOrCreateChild(parent, name) {
+  const it = parent.getFoldersByName(name);
+  if (it.hasNext()) return it.next();
+  return parent.createFolder(name);
 }
 
-// Etichete pentru fiecare item (afișate în doc)
+function getTargetFolder(testStr) {
+  // root
+  let root;
+  const roots = DriveApp.getFoldersByName(DRIVE_FOLDER_NAME);
+  root = roots.hasNext() ? roots.next() : DriveApp.createFolder(DRIVE_FOLDER_NAME);
+  // root / SESIUNE / Test N
+  const sessionFolder = getOrCreateChild(root, SESIUNE);
+  const testFolder = getOrCreateChild(sessionFolder, tabNameFromTest(testStr));
+  return testFolder;
+}
+
+// ============================================================
+// Etichete GENERICE (funcționează pentru oricare din cele 10 teste)
+// ============================================================
 const ITEM_LABELS = {
-  // Konnektoren
   g1: 'Konnektor 1', g2: 'Konnektor 2', g3: 'Konnektor 3', g4: 'Konnektor 4', g5: 'Konnektor 5',
-  // Prepoziții
   g6: 'Prepoziție 1', g7: 'Prepoziție 2', g8: 'Prepoziție 3', g9: 'Prepoziție 4', g10: 'Prepoziție 5',
-  // Aktiv → Passiv
-  g11: 'Passiv 1 (zehn Mitarbeiter)', g12: 'Passiv 2 (Meeting)', g13: 'Passiv 3 (Bericht)',
-  g14: 'Passiv 4 (Regel)', g15: 'Passiv 5 (Brot)',
-  // Rechtschreibung alegere
-  o1: 'Ortografie 1 (Straße)', o2: 'Ortografie 2 (Liebe)', o3: 'Ortografie 3 (schön)',
-  o4: 'Ortografie 4 (wohnen)', o5: 'Ortografie 5 (Freund)',
-  // Găsește greșeala
-  o6: 'Greșeala 1 (zur arbeit)', o7: 'Greșeala 2 (sehr Gut)', o8: 'Greșeala 3 (freunde)',
-  o9: 'Greșeala 4 (Schnell)', o10: 'Greșeala 5 (grosse)',
-  // Hörverstehen
-  h1: 'Hör 1: Wo arbeitet Peter?', h2: 'Hör 2: Warum gewechselt?',
-  h3: 'Hör 3: Wie viele Tage Homeoffice?', h4: 'Hör 4: Was empfiehlt Peter?',
-  h5: 'Hör 5 (R/F): Anna zufrieden?', h6: 'Hör 6 (R/F): Peter verdient mehr?',
-  h7: 'Hör 7 (R/F): Anna will sofort kündigen?', h8: 'Hör 8 (R/F): Treffen sich wieder?',
-  // Leseverstehen
-  l1: 'Lese 1: Wann Homeoffice entdeckt?', l2: 'Lese 2: Wie viele Firmen flexibel?',
-  l3: 'Lese 3: Experimente Island?', l4: 'Lese 4: Problem Homeoffice?',
-  l5: 'Lese 5: Branchen Gehälter gestiegen?',
-  l6: 'Lese 6: Wie nennt man Arbeit zu Hause?', l7: 'Lese 7: Welches Land Vier-Tage-Woche?',
-  l8: 'Lese 8: Was empfehlen Experten?', l9: 'Lese 9: Wie viele Tage?',
-  l10: 'Lese 10: Branchen niedrig?'
+  g11: 'Aktiv→Passiv 1', g12: 'Aktiv→Passiv 2', g13: 'Aktiv→Passiv 3', g14: 'Aktiv→Passiv 4', g15: 'Aktiv→Passiv 5',
+  o1: 'Ortografie 1', o2: 'Ortografie 2', o3: 'Ortografie 3', o4: 'Ortografie 4', o5: 'Ortografie 5',
+  o6: 'Găsește greșeala 1', o7: 'Găsește greșeala 2', o8: 'Găsește greșeala 3',
+  o9: 'Găsește greșeala 4', o10: 'Găsește greșeala 5',
+  h1: 'Hör 1 (MC)', h2: 'Hör 2 (MC)', h3: 'Hör 3 (MC)', h4: 'Hör 4 (MC)',
+  h5: 'Hör 5 (R/F)', h6: 'Hör 6 (R/F)', h7: 'Hör 7 (R/F)', h8: 'Hör 8 (R/F)',
+  l1: 'Lese 1 (MC)', l2: 'Lese 2 (MC)', l3: 'Lese 3 (MC)', l4: 'Lese 4 (MC)', l5: 'Lese 5 (MC)',
+  l6: 'Lese 6 (scurt)', l7: 'Lese 7 (scurt)', l8: 'Lese 8 (scurt)', l9: 'Lese 9 (scurt)', l10: 'Lese 10 (scurt)'
 };
 
 function createResponseDoc(payload, sheetUrl) {
@@ -86,17 +135,16 @@ function createResponseDoc(payload, sheetUrl) {
   const doc = DocumentApp.create(docName);
   const body = doc.getBody();
 
-  // Header
   const t1 = body.appendParagraph(test);
   t1.setHeading(DocumentApp.ParagraphHeading.HEADING1);
   t1.editAsText().setForegroundColor('#10B981');
 
+  body.appendParagraph('Sesiune: ' + SESIUNE);
   body.appendParagraph('Cursant: ' + nume + ' ' + prenume);
   body.appendParagraph('Data submit: ' + dataStr);
   body.appendParagraph('Timp folosit: ' + (payload.timeUsed || '-'));
   body.appendHorizontalRule();
 
-  // Scor
   if (score.totalAuto != null) {
     const h2 = body.appendParagraph('SCOR AUTOMAT');
     h2.setHeading(DocumentApp.ParagraphHeading.HEADING2);
@@ -116,7 +164,6 @@ function createResponseDoc(payload, sheetUrl) {
     body.appendHorizontalRule();
   }
 
-  // Răspunsuri detaliate per secțiune
   function appendSection(title, sectionKey, keys) {
     const h = body.appendParagraph(title);
     h.setHeading(DocumentApp.ParagraphHeading.HEADING2);
@@ -129,11 +176,8 @@ function createResponseDoc(payload, sheetUrl) {
       const label = ITEM_LABELS[k] || k;
       let line = label + ': ' + userAns;
       if (item) {
-        if (item.correct) {
-          line += '   ✓ corect (' + item.points + '/' + item.max + 'p)';
-        } else {
-          line += '   ✗ greșit (0/' + item.max + 'p)';
-        }
+        if (item.correct) line += '   ✓ corect (' + item.points + '/' + item.max + 'p)';
+        else line += '   ✗ greșit (0/' + item.max + 'p)';
       }
       const p = body.appendParagraph(line);
       if (item && item.correct === false) p.editAsText().setForegroundColor('#dc2626');
@@ -141,25 +185,22 @@ function createResponseDoc(payload, sheetUrl) {
     });
   }
 
-  appendSection('GRAMMATIK + RECHTSCHREIBUNG',
-    'grammatik',
+  appendSection('GRAMMATIK + RECHTSCHREIBUNG', 'grammatik',
     ['g1','g2','g3','g4','g5','g6','g7','g8','g9','g10','g11','g12','g13','g14','g15',
      'o1','o2','o3','o4','o5','o6','o7','o8','o9','o10']);
-
   appendSection('HÖRVERSTEHEN', 'hoerverstehen', ['h1','h2','h3','h4','h5','h6','h7','h8']);
   appendSection('LESEVERSTEHEN', 'leseverstehen', ['l1','l2','l3','l4','l5','l6','l7','l8','l9','l10']);
 
   body.appendHorizontalRule();
   body.appendParagraph('Sheet centralizator: ' + sheetUrl);
-  body.appendParagraph('Generat automat de sistemul Examen B2 · ʚଓ Claudia Toth · Curs autorizat ANC');
+  body.appendParagraph('Generat automat · Sesiune ' + SESIUNE + ' · ʚଓ Claudia Toth · Curs autorizat ANC');
 
   doc.saveAndClose();
 
-  // Mută în folderul dedicat
+  // Mută în folderul ierarhic SESIUNE / Test N
   try {
-    const folder = getOrCreateFolder();
-    const file = DriveApp.getFileById(doc.getId());
-    file.moveTo(folder);
+    const folder = getTargetFolder(test);
+    DriveApp.getFileById(doc.getId()).moveTo(folder);
   } catch (mvErr) {}
 
   return doc.getUrl();
@@ -170,11 +211,9 @@ function doPost(e) {
   let payload = null;
 
   try {
-    // ---- 1. Parse payload ----
     stage = 'parse';
     payload = JSON.parse(e.postData.contents);
 
-    // ---- 2. Verificare token ----
     stage = 'token';
     if (payload.token !== SECRET_TOKEN) {
       return ContentService
@@ -182,18 +221,16 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
-    // ---- 3. Acces sheet ----
     stage = 'sheet';
-    const sheet = getSheet();
+    const ss = getSpreadsheet();
+    const sheet = getTestSheet(ss, payload.test);
     const score = payload.score || {};
     const answers = payload.answers || {};
 
-    // ---- 4. Salvare row simplu (fail-safe) ----
-    // Adăugăm un row JSON brut în coloana A ca backup garantat,
-    // chiar dacă orice altceva eșuează. Așa nu pierdem submitul.
-    stage = 'backup-row';
+    stage = 'append-row';
     const backupRow = [
       new Date(),
+      SESIUNE,
       payload.test || '',
       payload.cursantNume || '',
       payload.cursantPrenume || '',
@@ -207,54 +244,21 @@ function doPost(e) {
       score.procentAuto != null ? (score.procentAuto + '%') : '',
       '',  // Total final manual
       '',  // Promovat manual
-      JSON.stringify(answers)  // toate răspunsurile ca JSON într-o singură celulă
+      JSON.stringify(answers)
     ];
-
-    // Dacă schema veche (g1, g2... ca antete) sau gol → reset și scrie antetele noi
-    stage = 'header-check';
-    const expectedHeaders = [
-      'Data trimitere', 'Test', 'Nume', 'Prenume', 'Timp folosit',
-      'Oficiu', 'Grammatik (/30)', 'Hörverstehen (/20)', 'Leseverstehen (/25)',
-      'Sprechen (/15) — manual',
-      'TOTAL AUTO (/85)', 'Procent auto', 'TOTAL FINAL (/100)', 'Promovat?',
-      'Răspunsuri (JSON)'
-    ];
-
-    const lastRow = sheet.getLastRow();
-    let needHeaderInit = (lastRow === 0);
-    if (lastRow > 0) {
-      const currentHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-      if (currentHeaders.indexOf('Oficiu') === -1) {
-        // Schema veche detectată → curățăm și recreăm
-        sheet.clear();
-        needHeaderInit = true;
-      }
-    }
-    if (needHeaderInit) {
-      sheet.appendRow(expectedHeaders);
-      try {
-        const r = sheet.getRange(1, 1, 1, expectedHeaders.length);
-        r.setFontWeight('bold').setBackground('#10B981').setFontColor('#FFFFFF');
-        sheet.setFrozenRows(1);
-      } catch (fmtErr) {}
-    }
-
-    stage = 'append-row';
     sheet.appendRow(backupRow);
 
-    // ---- 5. Google Doc cu răspunsuri (formatat) ----
     stage = 'create-doc';
     let docUrl = '';
     try {
-      docUrl = createResponseDoc(payload, sheet.getParent().getUrl());
+      docUrl = createResponseDoc(payload, ss.getUrl());
     } catch (docErr) {
-      // Nu lăsăm să crashuim totul dacă doc-ul eșuează
       docUrl = '(doc nu a putut fi creat: ' + docErr.toString() + ')';
     }
 
-    // ---- 6. Email cu scor ----
     stage = 'email';
-    const subject = '[Examen B2] Submit nou: ' + (payload.cursantNume || '?') + ' ' + (payload.cursantPrenume || '?');
+    const subject = '[Examen B2 · ' + SESIUNE + '] ' + (payload.test || '?') + ' — ' +
+                    (payload.cursantNume || '?') + ' ' + (payload.cursantPrenume || '?');
     let scoreSection = '';
     if (score && score.totalAuto != null) {
       scoreSection =
@@ -272,6 +276,7 @@ function doPost(e) {
 
     const body =
       'Un cursant a trimis examenul B2.\n\n' +
+      'Sesiune: ' + SESIUNE + '\n' +
       'Test: ' + (payload.test || '-') + '\n' +
       'Nume: ' + (payload.cursantNume || '?') + '\n' +
       'Prenume: ' + (payload.cursantPrenume || '?') + '\n' +
@@ -280,8 +285,8 @@ function doPost(e) {
       scoreSection +
       '\n📄 RĂSPUNSURI DETALIATE (Google Doc — formatat citibil):\n' +
       docUrl + '\n' +
-      '\n📊 Sheet centralizator (toți cursanții):\n' +
-      sheet.getParent().getUrl() + '\n\n' +
+      '\n📊 Sheet centralizator (foaia „' + tabNameFromTest(payload.test) + '"):\n' +
+      ss.getUrl() + '\n\n' +
       'JSON brut atașat (backup).\n\n' +
       'ʚଓ Claudia Toth · Curs autorizat ANC';
 
@@ -297,14 +302,14 @@ function doPost(e) {
     safeMail(subject, body, attachment);
 
     return ContentService
-      .createTextOutput(JSON.stringify({ status: 'ok', row: sheet.getLastRow() }))
+      .createTextOutput(JSON.stringify({ status: 'ok', tab: tabNameFromTest(payload.test), row: sheet.getLastRow() }))
       .setMimeType(ContentService.MimeType.JSON);
 
   } catch (err) {
-    // ---- ESEC: trimite email cu detalii ----
     const errMsg = '[Examen B2] EROARE la submit (stage: ' + stage + ')';
     const errBody =
       'A aparut o eroare la procesarea unui submit B2.\n\n' +
+      'Sesiune: ' + SESIUNE + '\n' +
       'Stage: ' + stage + '\n' +
       'Eroare: ' + err.toString() + '\n' +
       'Stack: ' + (err.stack || '(no stack)') + '\n\n' +
@@ -325,11 +330,11 @@ function testFunction() {
     postData: {
       contents: JSON.stringify({
         token: SECRET_TOKEN,
-        test: 'Test 1 — Arbeit & Beruf (TEST INTERN)',
+        test: 'Test 2 — Bildung & Studium (TEST INTERN)',
         cursantNume: 'Test',
         cursantPrenume: 'Cursant',
         timeUsed: '45:30',
-        answers: { g1: 'denn', g2: 'weil', h1: 'b', l1: 'b' },
+        answers: { g1: 'denn', g2: 'obwohl', h1: 'b', l1: 'b' },
         score: {
           oficiu: 10,
           grammatik: 22, grammatikMax: 30,
@@ -344,5 +349,5 @@ function testFunction() {
   };
   const result = doPost(fakeEvent);
   Logger.log(result.getContent());
-  Logger.log('Sheet URL: ' + getSheet().getParent().getUrl());
+  Logger.log('Sheet URL: ' + getSpreadsheet().getUrl());
 }
