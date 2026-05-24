@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test 3 - Umwelt & Klima - Examen B2</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .timer-bar { position: sticky; top: 0; z-index: 100; background: #065f46; color: white; padding: 12px 20px; text-align: center; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .timer-bar .time { font-size: 1.4rem; }
+        .exam-section { background: white; border: 2px solid #d1fae5; border-radius: 12px; padding: 24px; margin: 25px 0; }
+        .exam-section h2 { color: #065f46; border-bottom: 2px solid #10B981; padding-bottom: 10px; }
+        .exam-meta { display: flex; gap: 15px; flex-wrap: wrap; margin: 10px 0 20px; font-size: 0.9rem; color: #6b7280; }
+        .exam-meta span { background: #f0fdf4; padding: 4px 10px; border-radius: 6px; }
+
+        .question { margin: 18px 0; padding: 14px; background: #fafafa; border-radius: 8px; border-left: 3px solid #10B981; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .question .scroll-hint { display: none; }
+        .question .stmt { display: block; min-width: 100%; word-break: keep-all; }
+        @media (max-width: 640px) {
+            .question { white-space: nowrap; padding-bottom: 18px; position: relative; }
+            .question .stmt { display: inline-block; white-space: normal; min-width: max-content; max-width: 95vw; vertical-align: top; }
+            .question .scroll-hint { display: block; position: sticky; right: 0; bottom: 0; font-size: 0.72rem; color: #9ca3af; font-style: italic; padding-top: 6px; white-space: nowrap; }
+            .question input[type="text"] { white-space: normal; }
+            .mc-row { white-space: normal; }
+        }
+
+        .question-num { display: inline-block; background: #10B981; color: white; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; margin-right: 8px; flex-shrink: 0; }
+        .question input[type="text"] { width: 100%; padding: 9px; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 6px; font-size: 1rem; box-sizing: border-box; max-width: 100%; }
+        .question input[type="text"]:focus { border-color: #10B981; outline: none; }
+        .mc-row { margin: 6px 0; display: flex; align-items: flex-start; gap: 6px; }
+        .mc-row input[type="radio"] { margin-top: 4px; flex-shrink: 0; }
+        .mc-row label { flex: 1; }
+
+        .audio-player-exam { background: #eff6ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 14px; margin: 12px 0; }
+        .audio-player-exam button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-right: 8px; margin-bottom: 6px; }
+        .audio-player-exam .plays-left { color: #6b7280; font-size: 0.9rem; margin-left: 10px; }
+
+        .reading-text { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 18px 22px; border-radius: 8px; margin: 15px 0; line-height: 1.7; overflow-x: auto; }
+        .reading-text p { margin: 0.6em 0; }
+        .reading-text h3 { margin-top: 0; color: #92400e; }
+
+        .submit-btn { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: none; padding: 18px 40px; border-radius: 12px; font-size: 1.2rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35); display: block; margin: 40px auto; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45); }
+        .submitted-message { display: none; background: #d1fae5; border: 3px solid #10B981; border-radius: 12px; padding: 40px; text-align: center; }
+        .submitted-message h2 { color: #065f46; font-size: 2rem; margin-bottom: 15px; }
+        .submitted-message p { font-size: 1.15rem; color: #374151; }
+
+        .speaking-card { background: #f0fdf4; border-left: 4px solid #10B981; padding: 18px 22px; border-radius: 8px; margin: 15px 0; }
+        .speaking-card h4 { color: #065f46; margin-top: 0; }
+        .role-card { background: white; border: 2px dashed #10B981; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+        .role-card strong.role-label { color: #065f46; display: block; margin-bottom: 6px; }
+        .info-warning { background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 14px; margin: 18px 0; color: #78350f; font-weight: 600; text-align: center; }
+
+        .ortho-error-box { background: #fff7ed; border: 1px dashed #f59e0b; padding: 10px 14px; border-radius: 6px; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="timer-bar">
+        ⏱️ Timp rămas: <span class="time" id="timer">60:00</span> · Test 3 — Umwelt & Klima · 100 puncte · Prag promovare 60%
+    </div>
+
+    <nav class="navbar">
+        <span class="navbar-logo">ʚଓ Claudia Toth</span>
+        <ul class="navbar-menu">
+            <li><a href="#grammatik">1. Grammatik</a></li>
+            <li><a href="#hoeren">2. Hörverstehen</a></li>
+            <li><a href="#lesen">3. Leseverstehen</a></li>
+            <li><a href="#sprechen">4. Sprechen</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>ʚଓ Test 3 — Umwelt & Klima</h1>
+            <p class="subtitle">Examen B2 · Nivel mediu · 60 minute · 100 puncte (10 din oficiu)</p>
+            <p>Curs autorizat ANC · Claudia Toth · © 2026</p>
+        </div>
+
+        <div class="content" id="exam-content">
+
+            <div class="info-warning">
+                ⚠️ Citește toate întrebările cu atenție. La final apasă „Trimite examenul". <strong>Nu vei vedea scorul</strong> — corectarea o face examinatorul. Ai <strong>10 puncte din oficiu</strong>. <br>
+                <span style="color: #991b1b; font-weight: 700;">Examen oficial — odată trimis, NU mai poate fi reluat!</span>
+            </div>
+
+            <!-- ============ 1. GRAMMATIK ============ -->
+            <div class="exam-section" id="grammatik">
+                <h2>📝 1. Grammatik &amp; Rechtschreibung (Sprachbausteine + Ortografie)</h2>
+                <div class="exam-meta"><span>⏱️ 20 min</span><span>📋 25 itemi</span><span>💯 30 puncte</span></div>
+
+                <h3 style="color: #059669;">A. Konnektoren — completează cu cuvântul potrivit (5p)</h3>
+                <p style="color: #6b7280; font-style: italic;">Alege: weil · deshalb · obwohl · denn · trotzdem</p>
+
+                <div class="question"><span class="question-num">1</span><span class="stmt">Wir müssen die Umwelt schützen, ____________ wir keine zweite Erde haben.</span>
+                    <input type="text" name="g1" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">2</span><span class="stmt">____________ es draußen regnet, fahre ich mit dem Fahrrad zur Arbeit.</span>
+                    <input type="text" name="g2" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">3</span><span class="stmt">Die Temperaturen steigen jedes Jahr, ____________ müssen wir schnell handeln.</span>
+                    <input type="text" name="g3" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">4</span><span class="stmt">Viele Menschen recyceln nicht, ____________ es ihnen zu kompliziert erscheint.</span>
+                    <input type="text" name="g4" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">5</span><span class="stmt">Bio-Produkte sind teurer, ____________ kaufen sie immer mehr Menschen.</span>
+                    <input type="text" name="g5" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">B. Prepoziții cu cazuri — alege varianta corectă (5p)</h3>
+
+                <div class="question"><span class="question-num">6</span><span class="stmt">Wir kämpfen ____________ den Klimawandel.</span>
+                    <div class="mc-row"><input type="radio" name="g6" value="a" id="g6a"><label for="g6a">a) für</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="b" id="g6b"><label for="g6b">b) gegen</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="c" id="g6c"><label for="g6c">c) zu</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="d" id="g6d"><label for="g6d">d) mit</label></div>
+                </div>
+                <div class="question"><span class="question-num">7</span><span class="stmt">Die Regierung investiert ____________ erneuerbare Energien.</span>
+                    <div class="mc-row"><input type="radio" name="g7" value="a" id="g7a"><label for="g7a">a) auf</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="b" id="g7b"><label for="g7b">b) für</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="c" id="g7c"><label for="g7c">c) in</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="d" id="g7d"><label for="g7d">d) zu</label></div>
+                </div>
+                <div class="question"><span class="question-num">8</span><span class="stmt">Wegen ____________ Klimawandels sind viele Tierarten bedroht.</span>
+                    <div class="mc-row"><input type="radio" name="g8" value="a" id="g8a"><label for="g8a">a) der</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="b" id="g8b"><label for="g8b">b) dem</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="c" id="g8c"><label for="g8c">c) das</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="d" id="g8d"><label for="g8d">d) des</label></div>
+                </div>
+                <div class="question"><span class="question-num">9</span><span class="stmt">Sie macht sich Sorgen ____________ die Zukunft der Erde.</span>
+                    <div class="mc-row"><input type="radio" name="g9" value="a" id="g9a"><label for="g9a">a) auf</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="b" id="g9b"><label for="g9b">b) an</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="c" id="g9c"><label for="g9c">c) für</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="d" id="g9d"><label for="g9d">d) um</label></div>
+                </div>
+                <div class="question"><span class="question-num">10</span><span class="stmt">Während ____________ Sommers gab es viele Hitzewellen.</span>
+                    <div class="mc-row"><input type="radio" name="g10" value="a" id="g10a"><label for="g10a">a) der</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="b" id="g10b"><label for="g10b">b) das</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="c" id="g10c"><label for="g10c">c) dem</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="d" id="g10d"><label for="g10d">d) des</label></div>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">C. Aktiv → Passiv (Präsens) — transformă propoziția (10p)</h3>
+                <p style="color: #6b7280; font-style: italic;">Exemplu: Die Bürger trennen den Müll. → Der Müll wird von den Bürgern getrennt.</p>
+
+                <div class="question"><span class="question-num">11</span><span class="stmt">Aktiv: <em>Die Bürger recyceln den Plastikmüll.</em><br>Passiv:</span>
+                    <input type="text" name="g11" placeholder="Der Plastikmüll wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">12</span><span class="stmt">Aktiv: <em>Die Regierung beschließt neue Klimagesetze.</em><br>Passiv:</span>
+                    <input type="text" name="g12" placeholder="Neue Klimagesetze werden ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">13</span><span class="stmt">Aktiv: <em>Die Stadt pflanzt jeden Frühling tausend Bäume.</em><br>Passiv:</span>
+                    <input type="text" name="g13" placeholder="Jeden Frühling werden tausend Bäume ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">14</span><span class="stmt">Aktiv: <em>Die Industrie produziert große Mengen CO₂.</em><br>Passiv:</span>
+                    <input type="text" name="g14" placeholder="Große Mengen CO₂ werden ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">15</span><span class="stmt">Aktiv: <em>Die Wissenschaftler erforschen den Klimawandel.</em><br>Passiv:</span>
+                    <input type="text" name="g15" placeholder="Der Klimawandel wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">D. Rechtschreibung — alege scrierea corectă (5p)</h3>
+
+                <div class="question"><span class="question-num">16</span><span class="stmt">die ____ rderwärmung (încălzirea globală)</span>
+                    <div class="mc-row"><input type="radio" name="o1" value="a" id="o1a"><label for="o1a">a) E — Erderwärmung</label></div>
+                    <div class="mc-row"><input type="radio" name="o1" value="b" id="o1b"><label for="o1b">b) Ä — Ärderwärmung</label></div>
+                    <div class="mc-row"><input type="radio" name="o1" value="c" id="o1c"><label for="o1c">c) Ö — Örderwärmung</label></div>
+                </div>
+                <div class="question"><span class="question-num">17</span><span class="stmt">die D ____ rre (seceta)</span>
+                    <div class="mc-row"><input type="radio" name="o2" value="a" id="o2a"><label for="o2a">a) u — Durre</label></div>
+                    <div class="mc-row"><input type="radio" name="o2" value="b" id="o2b"><label for="o2b">b) ü — Dürre</label></div>
+                    <div class="mc-row"><input type="radio" name="o2" value="c" id="o2c"><label for="o2c">c) uh — Duhrre</label></div>
+                </div>
+                <div class="question"><span class="question-num">18</span><span class="stmt">der M ____ ll (gunoiul)</span>
+                    <div class="mc-row"><input type="radio" name="o3" value="a" id="o3a"><label for="o3a">a) ü — Müll</label></div>
+                    <div class="mc-row"><input type="radio" name="o3" value="b" id="o3b"><label for="o3b">b) u — Mull</label></div>
+                    <div class="mc-row"><input type="radio" name="o3" value="c" id="o3c"><label for="o3c">c) ue — Muell</label></div>
+                </div>
+                <div class="question"><span class="question-num">19</span><span class="stmt">schmel ____ en (a se topi)</span>
+                    <div class="mc-row"><input type="radio" name="o4" value="a" id="o4a"><label for="o4a">a) z — schmelzen</label></div>
+                    <div class="mc-row"><input type="radio" name="o4" value="b" id="o4b"><label for="o4b">b) tz — schmeltzen</label></div>
+                    <div class="mc-row"><input type="radio" name="o4" value="c" id="o4c"><label for="o4c">c) ss — schmelssen</label></div>
+                </div>
+                <div class="question"><span class="question-num">20</span><span class="stmt">der Ausst ____ (emisia)</span>
+                    <div class="mc-row"><input type="radio" name="o5" value="a" id="o5a"><label for="o5a">a) oss — Ausstoss</label></div>
+                    <div class="mc-row"><input type="radio" name="o5" value="b" id="o5b"><label for="o5b">b) ß — Ausstoß</label></div>
+                    <div class="mc-row"><input type="radio" name="o5" value="c" id="o5c"><label for="o5c">c) s — Ausstos</label></div>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">E. Găsește greșeala — rescrie corect (5p)</h3>
+                <p style="color: #6b7280; font-style: italic;">În fiecare propoziție există <strong>o singură greșeală</strong> de ortografie. Scrie cuvântul corect.</p>
+
+                <div class="question"><span class="question-num">21</span>
+                    <div class="ortho-error-box">Der klimawandel ist die größte Herausforderung unserer Zeit.</div>
+                    <input type="text" name="o6" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">22</span>
+                    <div class="ortho-error-box">Wir müssen alle Nachhaltig leben.</div>
+                    <input type="text" name="o7" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">23</span>
+                    <div class="ortho-error-box">Die regierung muss strenge Gesetze einführen.</div>
+                    <input type="text" name="o8" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">24</span>
+                    <div class="ortho-error-box">Plastikmüll ist sehr Schädlich für die Meere.</div>
+                    <input type="text" name="o9" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">25</span>
+                    <div class="ortho-error-box">Die grosse Hitzewelle hat viele Felder zerstört.</div>
+                    <input type="text" name="o10" placeholder="cuvântul corect">
+                </div>
+            </div>
+
+            <!-- ============ 2. HÖRVERSTEHEN ============ -->
+            <div class="exam-section" id="hoeren">
+                <h2>🎧 2. Hörverstehen</h2>
+                <div class="exam-meta"><span>⏱️ 10 min</span><span>📋 8 itemi</span><span>💯 20 puncte</span></div>
+
+                <h3 style="color: #059669;">Audio — Anunț la radio: Inițiativa „GrünStadt Berlin" (poți asculta de 2 ori)</h3>
+                <div class="audio-player-exam">
+                    <button onclick="playAudio('audio-1')">▶ Redă Audio</button>
+                    <button onclick="pauseAudio('audio-1')">⏸ Pauză</button>
+                    <span class="plays-left" id="plays-1">Ascultări rămase: 2</span>
+                    <audio id="audio-1" preload="none"><source src="audio/01-anunt-gruenstadt.mp3" type="audio/mpeg"></audio>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic;">Itemii 26-29: alege varianta corectă (3p fiecare = 12p)</p>
+
+                <div class="question"><span class="question-num">26</span><span class="stmt">Was ist das Ziel der Initiative „GrünStadt Berlin"?</span>
+                    <div class="mc-row"><input type="radio" name="h1" value="a" id="h1a"><label for="h1a">a) Mehr Parkplätze in der Stadt bauen</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="b" id="h1b"><label for="h1b">b) Berlin bis 2030 klimaneutral machen</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="c" id="h1c"><label for="h1c">c) Den öffentlichen Verkehr abschaffen</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="d" id="h1d"><label for="h1d">d) Neue Einkaufszentren errichten</label></div>
+                </div>
+                <div class="question"><span class="question-num">27</span><span class="stmt">Wie viele Bäume sollen jährlich gepflanzt werden?</span>
+                    <div class="mc-row"><input type="radio" name="h2" value="a" id="h2a"><label for="h2a">a) Fünfhundert</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="b" id="h2b"><label for="h2b">b) Tausend</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="c" id="h2c"><label for="h2c">c) Fünftausend</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="d" id="h2d"><label for="h2d">d) Zehntausend</label></div>
+                </div>
+                <div class="question"><span class="question-num">28</span><span class="stmt">Was bekommen Bürger, die ein E-Auto kaufen?</span>
+                    <div class="mc-row"><input type="radio" name="h3" value="a" id="h3a"><label for="h3a">a) Einen kostenlosen Parkplatz</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="b" id="h3b"><label for="h3b">b) Eine Förderung von 3.000 Euro</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="c" id="h3c"><label for="h3c">c) Kostenlosen Strom für ein Jahr</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="d" id="h3d"><label for="h3d">d) Eine Steuerermäßigung</label></div>
+                </div>
+                <div class="question"><span class="question-num">29</span><span class="stmt">Wo finden die Bürger mehr Informationen?</span>
+                    <div class="mc-row"><input type="radio" name="h4" value="a" id="h4a"><label for="h4a">a) Nur im Rathaus persönlich</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="b" id="h4b"><label for="h4b">b) Auf der Website oder per Telefon</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="c" id="h4c"><label for="h4c">c) Nur per Post</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="d" id="h4d"><label for="h4d">d) Über die Zeitung</label></div>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic; margin-top: 24px;">Itemii 30-33: bifează <strong>Richtig (R)</strong> sau <strong>Falsch (F)</strong> (2p fiecare = 8p)</p>
+
+                <div class="question"><span class="question-num">30</span><span class="stmt">Die Initiative „GrünStadt Berlin" gibt es seit 2024.</span>
+                    <div class="mc-row"><input type="radio" name="h5" value="R" id="h5r"><label for="h5r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h5" value="F" id="h5f"><label for="h5f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">31</span><span class="stmt">Die Stadt plant, alle Dieselautos sofort zu verbieten.</span>
+                    <div class="mc-row"><input type="radio" name="h6" value="R" id="h6r"><label for="h6r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h6" value="F" id="h6f"><label for="h6f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">32</span><span class="stmt">Die Förderung für E-Autos beträgt 3.000 Euro.</span>
+                    <div class="mc-row"><input type="radio" name="h7" value="R" id="h7r"><label for="h7r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h7" value="F" id="h7f"><label for="h7f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">33</span><span class="stmt">Bürger können sich auf der Website der Stadt informieren.</span>
+                    <div class="mc-row"><input type="radio" name="h8" value="R" id="h8r"><label for="h8r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h8" value="F" id="h8f"><label for="h8f">F — Falsch</label></div>
+                </div>
+            </div>
+
+            <!-- ============ 3. LESEVERSTEHEN ============ -->
+            <div class="exam-section" id="lesen">
+                <h2>📖 3. Leseverstehen</h2>
+                <div class="exam-meta"><span>⏱️ 15 min</span><span>📋 10 itemi</span><span>💯 25 puncte</span></div>
+
+                <h3 style="color: #059669;">Text — Articol despre Stadtprojekt „Berlin wird grün"</h3>
+                <div class="reading-text">
+                    <h3>Berlin wird grün — Stadt startet ambitioniertes Umweltprogramm</h3>
+                    <p>Berlin hat im März 2026 ein umfassendes Umweltprogramm gestartet, das die Hauptstadt bis 2035 zur grünsten Großstadt Deutschlands machen soll. Das Programm trägt den Namen „Berlin wird grün" und umfasst fünf Hauptbereiche.</p>
+                    <p>Erstens soll der öffentliche Nahverkehr massiv ausgebaut werden. Bis 2030 werden 200 neue Elektrobusse gekauft und alle U-Bahn-Linien mit erneuerbarer Energie betrieben. Die Stadt investiert dafür 800 Millionen Euro.</p>
+                    <p>Zweitens werden im Stadtgebiet 25.000 neue Bäume gepflanzt. Diese sollen vor allem in Stadtteilen mit wenig Grün gepflanzt werden, zum Beispiel in Neukölln und Wedding. Die Bäume helfen, die Luft zu reinigen und die Temperaturen im Sommer zu senken.</p>
+                    <p>Drittens bekommen Bürger, die ihr Haus energetisch sanieren (z.B. Solarzellen, bessere Isolierung), eine Förderung von bis zu 10.000 Euro. Das Programm gilt für alle Wohnungseigentümer in Berlin.</p>
+                    <p>Viertens werden 50 neue Fahrradwege gebaut, die das Zentrum mit den Außenbezirken verbinden. Die Stadt möchte den Anteil der Radfahrer von aktuell 18% auf 30% bis 2032 erhöhen.</p>
+                    <p>Fünftens startet ein neues Recycling-Programm. Jeder Haushalt bekommt vier verschiedene Mülltonnen: für Bio-Abfall, Plastik, Papier und Restmüll. Die Bürger werden bei falscher Mülltrennung mit einer Strafe von 50 Euro belegt.</p>
+                    <p>Die Bürgermeisterin sagte bei der Pressekonferenz: „Wir haben keine Zeit zu verlieren. Der Klimawandel wartet nicht. Berlin will Vorbild sein für andere Großstädte in Europa." Mehr Informationen finden Bürger auf der Website www.berlin-wird-gruen.de oder unter der Hotline 030/9028-1234.</p>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic;">Itemii 34-38: alege varianta corectă (3p fiecare = 15p)</p>
+
+                <div class="question"><span class="question-num">34</span><span class="stmt">Wann hat Berlin das Umweltprogramm gestartet?</span>
+                    <div class="mc-row"><input type="radio" name="l1" value="a" id="l1a"><label for="l1a">a) Im Januar 2025</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="b" id="l1b"><label for="l1b">b) Im März 2026</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="c" id="l1c"><label for="l1c">c) Im September 2024</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="d" id="l1d"><label for="l1d">d) Im Juli 2030</label></div>
+                </div>
+                <div class="question"><span class="question-num">35</span><span class="stmt">Wie viel Geld investiert die Stadt in den öffentlichen Nahverkehr?</span>
+                    <div class="mc-row"><input type="radio" name="l2" value="a" id="l2a"><label for="l2a">a) 100 Millionen Euro</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="b" id="l2b"><label for="l2b">b) 800 Millionen Euro</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="c" id="l2c"><label for="l2c">c) 1 Milliarde Euro</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="d" id="l2d"><label for="l2d">d) 500 Millionen Euro</label></div>
+                </div>
+                <div class="question"><span class="question-num">36</span><span class="stmt">Wofür bekommen Hausbesitzer eine Förderung?</span>
+                    <div class="mc-row"><input type="radio" name="l3" value="a" id="l3a"><label for="l3a">a) Für den Kauf eines E-Autos</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="b" id="l3b"><label for="l3b">b) Für energetische Sanierung (z.B. Solar, Isolierung)</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="c" id="l3c"><label for="l3c">c) Für ein neues Auto</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="d" id="l3d"><label for="l3d">d) Für einen neuen Kühlschrank</label></div>
+                </div>
+                <div class="question"><span class="question-num">37</span><span class="stmt">Was passiert bei falscher Mülltrennung?</span>
+                    <div class="mc-row"><input type="radio" name="l4" value="a" id="l4a"><label for="l4a">a) Nichts</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="b" id="l4b"><label for="l4b">b) Eine Warnung</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="c" id="l4c"><label for="l4c">c) Eine Strafe von 50 Euro</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="d" id="l4d"><label for="l4d">d) Verlust der Wohnung</label></div>
+                </div>
+                <div class="question"><span class="question-num">38</span><span class="stmt">Was sagt die Bürgermeisterin über Berlin?</span>
+                    <div class="mc-row"><input type="radio" name="l5" value="a" id="l5a"><label for="l5a">a) Berlin will Vorbild für andere Großstädte sein</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="b" id="l5b"><label for="l5b">b) Berlin wird die größte Stadt Europas</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="c" id="l5c"><label for="l5c">c) Berlin braucht keine Veränderung</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="d" id="l5d"><label for="l5d">d) Berlin will Touristen anziehen</label></div>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic; margin-top: 24px;">Itemii 39-43: răspunde scurt (un cuvânt, o cifră sau o expresie) (2p fiecare = 10p)</p>
+
+                <div class="question"><span class="question-num">39</span><span class="stmt">Bis wann soll Berlin die grünste Großstadt Deutschlands werden? (anul)</span>
+                    <input type="text" name="l6" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">40</span><span class="stmt">Wie viele neue Bäume sollen im Stadtgebiet gepflanzt werden?</span>
+                    <input type="text" name="l7" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">41</span><span class="stmt">Wie viele neue Fahrradwege werden gebaut?</span>
+                    <input type="text" name="l8" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">42</span><span class="stmt">Wie viele verschiedene Mülltonnen bekommt jeder Haushalt?</span>
+                    <input type="text" name="l9" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">43</span><span class="stmt">Wie heißt die Website mit Informationen?</span>
+                    <input type="text" name="l10" placeholder="...">
+                </div>
+            </div>
+
+            <!-- ============ 4. SPRECHEN ============ -->
+            <div class="exam-section" id="sprechen">
+                <h2>🗣️ 4. Sprechen — Dialog cu un coleg cursant (proba orală)</h2>
+                <div class="exam-meta"><span>⏱️ 5-7 min</span><span>📋 1 dialog în pereche</span><span>💯 15 puncte</span></div>
+
+                <p style="background: #fef3c7; padding: 12px 16px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                    <strong>Atenție:</strong> Această secțiune se desfășoară <strong>oral, în pereche cu un alt cursant</strong>. Examinatorul vă dă cartonașele cu rolul cu 1-2 minute înainte. Dacă numărul cursanților e impar, ultimul dialoghează cu examinatorul.
+                </p>
+
+                <div class="speaking-card">
+                    <h4>💬 Tema: „Klimaschutz — wer ist verantwortlich?"</h4>
+                    <p>Voi sunteți doi prieteni care discutați aprins despre protecția climei. <strong>Cursant A</strong> crede că responsabilitatea principală e a fiecărui individ. <strong>Cursant B</strong> crede că doar statul prin legi puternice poate schimba lucrurile cu adevărat. Argumentați și încercați să vă convingeți reciproc.</p>
+                    <p>Discutați împreună timp de 5-7 minute, în mod natural, ca într-o conversație reală. Examinatorul poate pune întrebări clarificatoare.</p>
+                </div>
+
+                <div class="role-card">
+                    <strong class="role-label">🅰️ Cursant A — responsabilitate individuală</strong>
+                    <ul>
+                        <li>Argumentează că fiecare cetățean contează — reciclare, transport, alimentație</li>
+                        <li>Vorbește despre amprenta ecologică și schimbarea obiceiurilor zilnice</li>
+                        <li>Răspunde la îngrijorările colegului despre limitele acțiunii individuale</li>
+                        <li>Sugerează cum poate fiecare să trăiască mai sustenabil</li>
+                    </ul>
+                </div>
+
+                <div class="role-card">
+                    <strong class="role-label">🅱️ Cursant B — responsabilitate statală / politică</strong>
+                    <ul>
+                        <li>Argumentează că doar legi puternice schimbă lucrurile (CO₂-Steuer, interzicerea fosilelor)</li>
+                        <li>Critică „picătura într-un ocean" — acțiunile individuale au efect limitat</li>
+                        <li>Vorbește despre rolul industriei și al politicii internaționale (Pariser Klimaabkommen)</li>
+                        <li>Propune investiții masive în energie regenerabilă</li>
+                    </ul>
+                </div>
+
+                <p style="margin-top: 16px; color: #6b7280; font-style: italic;">📊 Cotare (15p): realizarea sarcinii (5p) · coerență + fluență (4p) · vocabular (3p) · gramatică + pronunție (3p)</p>
+            </div>
+
+            <button class="submit-btn" onclick="submitExam()">📨 Trimite examenul</button>
+
+        </div>
+
+        <div class="submitted-message" id="submitted">
+            <h2>✓ Examenul a fost trimis!</h2>
+            <p>Ai finalizat Test 3 — Umwelt &amp; Klima.</p>
+            <p>Răspunsurile tale au fost salvate. <strong>Examinatorul</strong> îți va comunica scorul și rezultatul după ce verifică totul.</p>
+            <p style="margin-top: 24px; color: #991b1b; font-weight: 600;">Examen oficial — testul nu mai poate fi reluat.</p>
+            <p style="margin-top: 30px; font-size: 1.5rem;">ʚଓ</p>
+        </div>
+
+        <!-- Modal pentru identificare cursant -->
+        <div id="identity-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center;">
+            <div style="background:white; padding:30px 35px; border-radius:14px; max-width:480px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                <h2 style="color:#065f46; margin-top:0;">📝 Identificare cursant</h2>
+                <p style="color:#374151;">Înainte de a trimite examenul, te rog completează numele tău complet pentru ca examinatorul să poată corecta răspunsurile.</p>
+                <div style="margin:18px 0;">
+                    <label style="display:block; font-weight:600; color:#065f46; margin-bottom:6px;">Nume (de familie):</label>
+                    <input type="text" id="modal-nume" style="width:100%; padding:11px; border:2px solid #d1d5db; border-radius:8px; font-size:1rem; box-sizing:border-box;" placeholder="ex: Popescu" autocomplete="family-name">
+                </div>
+                <div style="margin:18px 0;">
+                    <label style="display:block; font-weight:600; color:#065f46; margin-bottom:6px;">Prenume:</label>
+                    <input type="text" id="modal-prenume" style="width:100%; padding:11px; border:2px solid #d1d5db; border-radius:8px; font-size:1rem; box-sizing:border-box;" placeholder="ex: Maria" autocomplete="given-name">
+                </div>
+                <div id="modal-error" style="color:#dc2626; font-size:0.9rem; margin:8px 0; display:none;">⚠️ Te rog completează ambele câmpuri.</div>
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                    <button onclick="cancelSubmit()" style="background:#6b7280; color:white; border:none; padding:11px 22px; border-radius:8px; cursor:pointer; font-weight:600;">Anulează</button>
+                    <button onclick="confirmSubmit()" style="background:#10B981; color:white; border:none; padding:11px 22px; border-radius:8px; cursor:pointer; font-weight:600;">✓ Trimite examenul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="test.js"></script>
+</body>
+</html>
