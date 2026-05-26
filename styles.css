@@ -775,6 +775,43 @@ body {
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
         max-width: 100%;
+        scrollbar-width: thin;
+        scrollbar-color: #f59e0b #fef3c7;
+        background-image: linear-gradient(to right, transparent calc(100% - 32px), rgba(245, 158, 11, 0.28) 100%);
+        background-attachment: local;
+        background-repeat: no-repeat;
+    }
+
+    .theory-table::-webkit-scrollbar,
+    .grammar-table::-webkit-scrollbar {
+        height: 6px;
+    }
+    .theory-table::-webkit-scrollbar-track,
+    .grammar-table::-webkit-scrollbar-track {
+        background: #fef3c7;
+        border-radius: 3px;
+    }
+    .theory-table::-webkit-scrollbar-thumb,
+    .grammar-table::-webkit-scrollbar-thumb {
+        background: #f59e0b;
+        border-radius: 3px;
+    }
+
+    .theory-table::before,
+    .grammar-table::before {
+        content: '👈 Glisează lateral pentru toate coloanele 👉';
+        display: block;
+        background: #fef3c7;
+        color: #92400e;
+        padding: 6px 10px;
+        font-size: 0.72rem;
+        text-align: center;
+        font-style: italic;
+        border-radius: 6px 6px 0 0;
+        white-space: nowrap;
+        border-bottom: 1px solid #f59e0b;
+        position: sticky;
+        left: 0;
     }
 
     .theory-table th,
