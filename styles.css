@@ -767,12 +767,20 @@ body {
         font-size: 1rem;
     }
 
-    .theory-table {
+    .theory-table,
+    .grammar-table {
         font-size: 0.9rem;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
     }
 
     .theory-table th,
-    .theory-table td {
+    .theory-table td,
+    .grammar-table th,
+    .grammar-table td {
         padding: 8px;
     }
 }
