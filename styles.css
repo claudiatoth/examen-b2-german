@@ -1211,3 +1211,22 @@ body {
         width: 100%;
     }
 }
+
+/* ===== REGULA 14 PATCH â€” touch scroll mobile (fix raportat 31 mai 2026) ===== */
+@media (max-width: 768px) {
+    .theory-table,
+    .grammar-table {
+        touch-action: pan-x !important;
+        -webkit-overflow-scrolling: touch !important;
+        overflow-x: auto !important;
+    }
+    /* Wrapper-ul (theory-box) nu trebuie sÄƒ blocheze scroll-ul */
+    .theory-box {
+        overflow: visible !important;
+    }
+    /* Verb cards la fel */
+    .verb-card {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+}
