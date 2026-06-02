@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test 6 - Reisen & Tourismus - Examen B2</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .timer-bar { position: sticky; top: 0; z-index: 100; background: #065f46; color: white; padding: 12px 20px; text-align: center; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .timer-bar .time { font-size: 1.4rem; }
+        .exam-section { background: white; border: 2px solid #d1fae5; border-radius: 12px; padding: 24px; margin: 25px 0; }
+        .exam-section h2 { color: #065f46; border-bottom: 2px solid #10B981; padding-bottom: 10px; }
+        .exam-meta { display: flex; gap: 15px; flex-wrap: wrap; margin: 10px 0 20px; font-size: 0.9rem; color: #6b7280; }
+        .exam-meta span { background: #f0fdf4; padding: 4px 10px; border-radius: 6px; }
+
+        .question { margin: 18px 0; padding: 14px; background: #fafafa; border-radius: 8px; border-left: 3px solid #10B981; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .question .scroll-hint { display: none; }
+        .question .stmt { display: block; min-width: 100%; word-break: keep-all; }
+        @media (max-width: 640px) {
+            .question { white-space: nowrap; padding-bottom: 18px; position: relative; }
+            .question .stmt { display: inline-block; white-space: normal; min-width: max-content; max-width: 95vw; vertical-align: top; }
+            .question .scroll-hint { display: block; position: sticky; right: 0; bottom: 0; font-size: 0.72rem; color: #9ca3af; font-style: italic; padding-top: 6px; white-space: nowrap; }
+            .question input[type="text"] { white-space: normal; }
+            .mc-row { white-space: normal; }
+        }
+
+        .question-num { display: inline-block; background: #10B981; color: white; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; margin-right: 8px; flex-shrink: 0; }
+        .question input[type="text"] { width: 100%; padding: 9px; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 6px; font-size: 1rem; box-sizing: border-box; max-width: 100%; }
+        .question input[type="text"]:focus { border-color: #10B981; outline: none; }
+        .mc-row { margin: 6px 0; display: flex; align-items: flex-start; gap: 6px; }
+        .mc-row input[type="radio"] { margin-top: 4px; flex-shrink: 0; }
+        .mc-row label { flex: 1; }
+
+        .audio-player-exam { background: #eff6ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 14px; margin: 12px 0; }
+        .audio-player-exam button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-right: 8px; margin-bottom: 6px; }
+        .audio-player-exam .plays-left { color: #6b7280; font-size: 0.9rem; margin-left: 10px; }
+
+        .reading-text { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 18px 22px; border-radius: 8px; margin: 15px 0; line-height: 1.7; overflow-x: auto; }
+        .reading-text p { margin: 0.6em 0; }
+        .reading-text h3 { margin-top: 0; color: #92400e; }
+
+        .submit-btn { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: none; padding: 18px 40px; border-radius: 12px; font-size: 1.2rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35); display: block; margin: 40px auto; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45); }
+        .submitted-message { display: none; background: #d1fae5; border: 3px solid #10B981; border-radius: 12px; padding: 40px; text-align: center; }
+        .submitted-message h2 { color: #065f46; font-size: 2rem; margin-bottom: 15px; }
+        .submitted-message p { font-size: 1.15rem; color: #374151; }
+
+        .speaking-card { background: #f0fdf4; border-left: 4px solid #10B981; padding: 18px 22px; border-radius: 8px; margin: 15px 0; }
+        .speaking-card h4 { color: #065f46; margin-top: 0; }
+        .role-card { background: white; border: 2px dashed #10B981; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+        .role-card strong.role-label { color: #065f46; display: block; margin-bottom: 6px; }
+        .info-warning { background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 14px; margin: 18px 0; color: #78350f; font-weight: 600; text-align: center; }
+
+        .ortho-error-box { background: #fff7ed; border: 1px dashed #f59e0b; padding: 10px 14px; border-radius: 6px; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="timer-bar">
+        ⏱️ Timp rămas: <span class="time" id="timer">60:00</span> · Test 6 — Reisen & Tourismus · 100 puncte · Prag promovare 60%
+    </div>
+
+    <nav class="navbar">
+        <span class="navbar-logo">ʚଓ Claudia Toth</span>
+        <ul class="navbar-menu">
+            <li><a href="#grammatik">1. Grammatik</a></li>
+            <li><a href="#hoeren">2. Hörverstehen</a></li>
+            <li><a href="#lesen">3. Leseverstehen</a></li>
+            <li><a href="#sprechen">4. Sprechen</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>ʚଓ Test 6 — Reisen & Tourismus</h1>
+            <p class="subtitle">Examen B2 · Nivel mediu · 60 minute · 100 puncte (10 din oficiu)</p>
+            <p>Curs autorizat ANC · Claudia Toth · © 2026</p>
+        </div>
+
+        <div class="content" id="exam-content">
+
+            <div class="info-warning">
+                ⚠️ Citește toate întrebările cu atenție. La final apasă „Trimite examenul". <strong>Nu vei vedea scorul</strong> — corectarea o face examinatorul. Ai <strong>10 puncte din oficiu</strong>. <br>
+                <span style="color: #991b1b; font-weight: 700;">Examen oficial — odată trimis, NU mai poate fi reluat!</span>
+            </div>
+
+            <!-- ============ 1. GRAMMATIK ============ -->
+            <div class="exam-section" id="grammatik">
+                <h2>📝 1. Grammatik &amp; Rechtschreibung (Sprachbausteine + Ortografie)</h2>
+                <div class="exam-meta"><span>⏱️ 20 min</span><span>📋 25 itemi</span><span>💯 30 puncte</span></div>
+
+                <h3 style="color: #059669;">A. Konnektoren — completează cu cuvântul potrivit (5p)</h3>
+                <p style="color: #6b7280; font-style: italic;">Alege: weil · deshalb · obwohl · denn · trotzdem</p>
+
+                <div class="question"><span class="question-num">1</span><span class="stmt">Viele Familien buchen Pauschalreisen, ____________ alles im Preis inbegriffen ist.</span>
+                    <input type="text" name="g1" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">2</span><span class="stmt">____________ Fliegen schnell ist, hat es einen großen CO₂-Fußabdruck.</span>
+                    <input type="text" name="g2" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">3</span><span class="stmt">Massentourismus schadet der Umwelt, ____________ führen viele Städte Tourismussteuern ein.</span>
+                    <input type="text" name="g3" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">4</span><span class="stmt">Andreea reist nur mit dem Zug, ____________ sie das Klima schützen möchte.</span>
+                    <input type="text" name="g4" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">5</span><span class="stmt">Kreuzfahrten sind sehr umweltbelastend, ____________ sind sie bei Rentnern beliebt.</span>
+                    <input type="text" name="g5" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">B. Prepoziții cu cazuri — alege varianta corectă (5p)</h3>
+
+                <div class="question"><span class="question-num">6</span><span class="stmt">Ich fahre dieses Jahr ____________ Italien in den Urlaub.</span>
+                    <div class="mc-row"><input type="radio" name="g6" value="a" id="g6a"><label for="g6a">a) in</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="b" id="g6b"><label for="g6b">b) nach</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="c" id="g6c"><label for="g6c">c) zu</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="d" id="g6d"><label for="g6d">d) auf</label></div>
+                </div>
+                <div class="question"><span class="question-num">7</span><span class="stmt">Andreea freut sich schon sehr ____________ die nächste Reise.</span>
+                    <div class="mc-row"><input type="radio" name="g7" value="a" id="g7a"><label for="g7a">a) für</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="b" id="g7b"><label for="g7b">b) über</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="c" id="g7c"><label for="g7c">c) auf</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="d" id="g7d"><label for="g7d">d) an</label></div>
+                </div>
+                <div class="question"><span class="question-num">8</span><span class="stmt">Wegen ____________ Verspätung haben wir den Anschlusszug verpasst.</span>
+                    <div class="mc-row"><input type="radio" name="g8" value="a" id="g8a"><label for="g8a">a) die</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="b" id="g8b"><label for="g8b">b) der</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="c" id="g8c"><label for="g8c">c) den</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="d" id="g8d"><label for="g8d">d) dem</label></div>
+                </div>
+                <div class="question"><span class="question-num">9</span><span class="stmt">Carolina reist immer ____________ ihrer Schwester.</span>
+                    <div class="mc-row"><input type="radio" name="g9" value="a" id="g9a"><label for="g9a">a) mit</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="b" id="g9b"><label for="g9b">b) bei</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="c" id="g9c"><label for="g9c">c) zu</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="d" id="g9d"><label for="g9d">d) für</label></div>
+                </div>
+                <div class="question"><span class="question-num">10</span><span class="stmt">Statt ____________ Flugzeugs nehme ich den Zug.</span>
+                    <div class="mc-row"><input type="radio" name="g10" value="a" id="g10a"><label for="g10a">a) das</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="b" id="g10b"><label for="g10b">b) dem</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="c" id="g10c"><label for="g10c">c) den</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="d" id="g10d"><label for="g10d">d) des</label></div>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">C. Aktiv → Passiv (Präsens) — transformă propoziția (10p)</h3>
+                <p style="color: #6b7280; font-style: italic;">Exemplu: Das Reisebüro bucht den Flug. → Der Flug wird vom Reisebüro gebucht.</p>
+
+                <div class="question"><span class="question-num">11</span><span class="stmt">Aktiv: <em>Das Reisebüro bucht den Flug.</em><br>Passiv:</span>
+                    <input type="text" name="g11" placeholder="Der Flug wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">12</span><span class="stmt">Aktiv: <em>Viele Touristen besuchen Venedig.</em><br>Passiv:</span>
+                    <input type="text" name="g12" placeholder="Venedig wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">13</span><span class="stmt">Aktiv: <em>Die Stadt führt eine Tourismussteuer ein.</em><br>Passiv:</span>
+                    <input type="text" name="g13" placeholder="Eine Tourismussteuer wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">14</span><span class="stmt">Aktiv: <em>Der Reiseführer plant die Tour.</em><br>Passiv:</span>
+                    <input type="text" name="g14" placeholder="Die Tour wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">15</span><span class="stmt">Aktiv: <em>Backpacking reduziert die Reisekosten.</em><br>Passiv:</span>
+                    <input type="text" name="g15" placeholder="Die Reisekosten werden ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">D. Rechtschreibung — alege scrierea corectă (5p)</h3>
+
+                <div class="question"><span class="question-num">16</span><span class="stmt">die Reisepl____ne (planurile de călătorie)</span>
+                    <div class="mc-row"><input type="radio" name="o1" value="a" id="o1a"><label for="o1a">a) a — Reisepläne — Reiseplane</label></div>
+                    <div class="mc-row"><input type="radio" name="o1" value="b" id="o1b"><label for="o1b">b) ä — Reisepläne</label></div>
+                    <div class="mc-row"><input type="radio" name="o1" value="c" id="o1c"><label for="o1c">c) ä cu e — Reiseplaene</label></div>
+                </div>
+                <div class="question"><span class="question-num">17</span><span class="stmt">der Reisef____hrer (ghidul de călătorie)</span>
+                    <div class="mc-row"><input type="radio" name="o2" value="a" id="o2a"><label for="o2a">a) u — Reiseführer — Reisefuhrer</label></div>
+                    <div class="mc-row"><input type="radio" name="o2" value="b" id="o2b"><label for="o2b">b) ü — Reiseführer</label></div>
+                    <div class="mc-row"><input type="radio" name="o2" value="c" id="o2c"><label for="o2c">c) uh — Reisefuhrer</label></div>
+                </div>
+                <div class="question"><span class="question-num">18</span><span class="stmt">die Str____nde (plajele)</span>
+                    <div class="mc-row"><input type="radio" name="o3" value="a" id="o3a"><label for="o3a">a) a — Strande</label></div>
+                    <div class="mc-row"><input type="radio" name="o3" value="b" id="o3b"><label for="o3b">b) ä — Strände</label></div>
+                    <div class="mc-row"><input type="radio" name="o3" value="c" id="o3c"><label for="o3c">c) e — Strende</label></div>
+                </div>
+                <div class="question"><span class="question-num">19</span><span class="stmt">die gro____e Reise (călătoria mare)</span>
+                    <div class="mc-row"><input type="radio" name="o4" value="a" id="o4a"><label for="o4a">a) ss — grosse</label></div>
+                    <div class="mc-row"><input type="radio" name="o4" value="b" id="o4b"><label for="o4b">b) ß — große</label></div>
+                    <div class="mc-row"><input type="radio" name="o4" value="c" id="o4c"><label for="o4c">c) s — grose</label></div>
+                </div>
+                <div class="question"><span class="question-num">20</span><span class="stmt">das Gep____ck (bagajul)</span>
+                    <div class="mc-row"><input type="radio" name="o5" value="a" id="o5a"><label for="o5a">a) a — Gepack</label></div>
+                    <div class="mc-row"><input type="radio" name="o5" value="b" id="o5b"><label for="o5b">b) ä — Gepäck</label></div>
+                    <div class="mc-row"><input type="radio" name="o5" value="c" id="o5c"><label for="o5c">c) e — Gepeck</label></div>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">E. Găsește greșeala — rescrie corect (5p)</h3>
+                <p style="color: #6b7280; font-style: italic;">În fiecare propoziție există <strong>o singură greșeală</strong> de ortografie (majusculă/minusculă sau literă greșită). Scrie cuvântul corect.</p>
+
+                <div class="question"><span class="question-num">21</span>
+                    <div class="ortho-error-box">Reisen ist Schön und lehrreich.</div>
+                    <input type="text" name="o6" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">22</span>
+                    <div class="ortho-error-box">Mein reisepass ist abgelaufen.</div>
+                    <input type="text" name="o7" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">23</span>
+                    <div class="ortho-error-box">Wir fahren mit dem zug nach Wien.</div>
+                    <input type="text" name="o8" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">24</span>
+                    <div class="ortho-error-box">Ich Buche meine Reisen immer online.</div>
+                    <input type="text" name="o9" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">25</span>
+                    <div class="ortho-error-box">Die Touristen Besuchen Venedig jedes Jahr.</div>
+                    <input type="text" name="o10" placeholder="cuvântul corect">
+                </div>
+            </div>
+
+            <!-- ============ 2. HÖRVERSTEHEN ============ -->
+            <div class="exam-section" id="hoeren">
+                <h2>🎧 2. Hörverstehen</h2>
+                <div class="exam-meta"><span>⏱️ 10 min</span><span>📋 8 itemi</span><span>💯 20 puncte</span></div>
+
+                <h3 style="color: #059669;">Audio — Podcast „Reisetrends 2026" cu travel blogger Anna Müller (poți asculta de 2 ori)</h3>
+                <div class="audio-player-exam">
+                    <button onclick="playAudio('audio-1')">▶ Redă Audio</button>
+                    <button onclick="pauseAudio('audio-1')">⏸ Pauză</button>
+                    <span class="plays-left" id="plays-1">Ascultări rămase: 2</span>
+                    <audio id="audio-1" preload="none"><source src="audio/01-podcast-reisen.mp3" type="audio/mpeg"></audio>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic;">Itemii 26-29: alege varianta corectă (3p fiecare = 12p)</p>
+
+                <div class="question"><span class="question-num">26</span><span class="stmt">Welcher Reisetrend wächst am stärksten?</span>
+                    <div class="mc-row"><input type="radio" name="h1" value="a" id="h1a"><label for="h1a">a) All-Inclusive-Reisen</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="b" id="h1b"><label for="h1b">b) Slow Travel und nachhaltige Reisen</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="c" id="h1c"><label for="h1c">c) Kreuzfahrten in der Karibik</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="d" id="h1d"><label for="h1d">d) Massentourismus-Pauschalreisen</label></div>
+                </div>
+                <div class="question"><span class="question-num">27</span><span class="stmt">Was kritisiert Anna Müller am meisten?</span>
+                    <div class="mc-row"><input type="radio" name="h2" value="a" id="h2a"><label for="h2a">a) Die Preise von Pauschalreisen</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="b" id="h2b"><label for="h2b">b) Den Massentourismus und seine Folgen</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="c" id="h2c"><label for="h2c">c) Die Qualität der Hotels</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="d" id="h2d"><label for="h2d">d) Die Sprachbarriere im Ausland</label></div>
+                </div>
+                <div class="question"><span class="question-num">28</span><span class="stmt">Was empfiehlt sie als Alternative zum Fliegen in Europa?</span>
+                    <div class="mc-row"><input type="radio" name="h3" value="a" id="h3a"><label for="h3a">a) Mit dem Auto fahren</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="b" id="h3b"><label for="h3b">b) Mit dem Zug fahren (z.B. ICE oder Nachtzug)</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="c" id="h3c"><label for="h3c">c) Zu Hause bleiben</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="d" id="h3d"><label for="h3d">d) Mit dem Schiff</label></div>
+                </div>
+                <div class="question"><span class="question-num">29</span><span class="stmt">Was ist „Heimaturlaub" laut Anna?</span>
+                    <div class="mc-row"><input type="radio" name="h4" value="a" id="h4a"><label for="h4a">a) Urlaub im Wohnort, ohne zu verreisen</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="b" id="h4b"><label for="h4b">b) Urlaub im eigenen Heimatland — günstig und nachhaltig</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="c" id="h4c"><label for="h4c">c) Urlaub im Ausland mit der Familie</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="d" id="h4d"><label for="h4d">d) Urlaub nur im Winter</label></div>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic; margin-top: 24px;">Itemii 30-33: bifează <strong>Richtig (R)</strong> sau <strong>Falsch (F)</strong> (2p fiecare = 8p)</p>
+
+                <div class="question"><span class="question-num">30</span><span class="stmt">Anna Müller arbeitet seit 10 Jahren als Reisebloggerin.</span>
+                    <div class="mc-row"><input type="radio" name="h5" value="R" id="h5r"><label for="h5r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h5" value="F" id="h5f"><label for="h5f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">31</span><span class="stmt">Venedig und Mallorca haben Tourismussteuern eingeführt.</span>
+                    <div class="mc-row"><input type="radio" name="h6" value="R" id="h6r"><label for="h6r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h6" value="F" id="h6f"><label for="h6f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">32</span><span class="stmt">Anna fliegt jedes Jahr mindestens 5 Mal in den Urlaub.</span>
+                    <div class="mc-row"><input type="radio" name="h7" value="R" id="h7r"><label for="h7r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h7" value="F" id="h7f"><label for="h7f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">33</span><span class="stmt">Workation kombiniert Arbeit und Urlaub am selben Ort.</span>
+                    <div class="mc-row"><input type="radio" name="h8" value="R" id="h8r"><label for="h8r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h8" value="F" id="h8f"><label for="h8f">F — Falsch</label></div>
+                </div>
+            </div>
+
+            <!-- ============ 3. LESEVERSTEHEN ============ -->
+            <div class="exam-section" id="lesen">
+                <h2>📖 3. Leseverstehen</h2>
+                <div class="exam-meta"><span>⏱️ 15 min</span><span>📋 10 itemi</span><span>💯 25 puncte</span></div>
+
+                <h3 style="color: #059669;">Text — Articol despre Massentourismus în Europa (Mallorca, Venedig, Barcelona)</h3>
+                <div class="reading-text">
+                    <h3>Massentourismus in Europa — Mallorca, Venedig und Barcelona ziehen die Notbremse</h3>
+                    <p>Im Sommer 2025 hat Venedig als erste europäische Großstadt eine <strong>Tourismussteuer von 10 Euro pro Tagesbesucher</strong> eingeführt. Mallorca folgte im Frühjahr 2026 mit einer ähnlichen Maßnahme: pro Übernachtung zahlen Touristen jetzt 4 Euro zusätzlich. Auch Barcelona begrenzt seit 2024 die Anzahl der Kreuzfahrtschiffe pro Tag auf maximal drei.</p>
+                    <p>Der Grund: Der Massentourismus erreicht Rekordhöhen. Laut Eurostat empfing Mallorca 2025 über <strong>14,4 Millionen Touristen</strong> — bei nur 950 000 Einwohnern. In Venedig kommen täglich bis zu 90 000 Tagesbesucher in eine Stadt mit knapp 50 000 Einwohnern. Die Folgen sind dramatisch: steigende Mieten, überfüllte Straßen, Wassermangel, Müllprobleme und eine massive Umweltbelastung.</p>
+                    <p>Eine Studie der TU Wien zeigt, dass <strong>32% der Einheimischen</strong> in den großen Tourismushotspots inzwischen aus dem Stadtzentrum weggezogen sind. Wohnungen werden zu Ferienwohnungen umgewandelt, Restaurants nur noch auf Touristen ausgerichtet. „Wir verlieren unsere eigene Stadt", sagt Maria Rossi, eine Venezianerin, die in eine Vorstadt ziehen musste.</p>
+                    <p>Gleichzeitig wächst die Gegenbewegung: <strong>nachhaltiger Tourismus</strong>. Immer mehr Reisende suchen nach Alternativen. Slow Travel, Eco-Tourismus und Heimaturlaub sind die Trends 2026. Laut einer Umfrage des Deutschen Reiseverbands geben <strong>46% der Deutschen</strong> an, dass sie 2026 bewusster reisen möchten — weniger Flüge, längere Aufenthalte, mehr Kontakt zur lokalen Bevölkerung.</p>
+                    <p>Auch der Verkehrssektor reagiert. Die Deutsche Bahn meldet eine Zunahme von 23% bei den Nachtzug-Buchungen im Jahr 2025. Statt mit dem Flugzeug fahren immer mehr Menschen mit dem ICE oder dem Nachtzug nach Italien, Frankreich oder Österreich.</p>
+                    <p>Dr. Klaus Weber, Tourismusforscher an der Universität Hamburg, erklärt: „Massentourismus ist nicht nachhaltig — weder für die Umwelt noch für die lokale Bevölkerung. Wir brauchen ein Gleichgewicht zwischen Wirtschaft und Lebensqualität. Tourismussteuern sind ein erster Schritt, aber wir brauchen auch Aufklärung der Reisenden."</p>
+                    <p>Wichtig sei vor allem die <strong>Verantwortung jedes Einzelnen</strong>. „Wenn jeder Reisende weniger oft fliegt, mehr Zeit an einem Ort verbringt und lokal konsumiert, kann sich vieles ändern", so Weber. Sein Rat: Plant eure Reisen bewusst — Qualität statt Quantität.</p>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic;">Itemii 34-38: alege varianta corectă (3p fiecare = 15p)</p>
+
+                <div class="question"><span class="question-num">34</span><span class="stmt">Wie viel kostet die Tourismussteuer in Venedig pro Tagesbesucher?</span>
+                    <div class="mc-row"><input type="radio" name="l1" value="a" id="l1a"><label for="l1a">a) 2 Euro</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="b" id="l1b"><label for="l1b">b) 5 Euro</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="c" id="l1c"><label for="l1c">c) 10 Euro</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="d" id="l1d"><label for="l1d">d) 20 Euro</label></div>
+                </div>
+                <div class="question"><span class="question-num">35</span><span class="stmt">Wie viele Touristen empfing Mallorca 2025?</span>
+                    <div class="mc-row"><input type="radio" name="l2" value="a" id="l2a"><label for="l2a">a) 4,5 Millionen</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="b" id="l2b"><label for="l2b">b) 14,4 Millionen</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="c" id="l2c"><label for="l2c">c) 20 Millionen</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="d" id="l2d"><label for="l2d">d) 30 Millionen</label></div>
+                </div>
+                <div class="question"><span class="question-num">36</span><span class="stmt">Wie viele Kreuzfahrtschiffe darf Barcelona pro Tag empfangen?</span>
+                    <div class="mc-row"><input type="radio" name="l3" value="a" id="l3a"><label for="l3a">a) Eines</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="b" id="l3b"><label for="l3b">b) Maximal drei</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="c" id="l3c"><label for="l3c">c) Unbegrenzt</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="d" id="l3d"><label for="l3d">d) Maximal zehn</label></div>
+                </div>
+                <div class="question"><span class="question-num">37</span><span class="stmt">Was sind die Trends 2026?</span>
+                    <div class="mc-row"><input type="radio" name="l4" value="a" id="l4a"><label for="l4a">a) Mehr Flüge in ferne Länder</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="b" id="l4b"><label for="l4b">b) Slow Travel, Eco-Tourismus und Heimaturlaub</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="c" id="l4c"><label for="l4c">c) Mehr All-Inclusive-Reisen</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="d" id="l4d"><label for="l4d">d) Mehr Kreuzfahrten</label></div>
+                </div>
+                <div class="question"><span class="question-num">38</span><span class="stmt">Was rät Dr. Klaus Weber den Reisenden?</span>
+                    <div class="mc-row"><input type="radio" name="l5" value="a" id="l5a"><label for="l5a">a) Möglichst billig zu reisen</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="b" id="l5b"><label for="l5b">b) Qualität statt Quantität — bewusst zu reisen</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="c" id="l5c"><label for="l5c">c) Nicht mehr zu reisen</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="d" id="l5d"><label for="l5d">d) Nur in Deutschland zu bleiben</label></div>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic; margin-top: 24px;">Itemii 39-43: răspunde scurt (un cuvânt, o cifră sau o expresie) (2p fiecare = 10p)</p>
+
+                <div class="question"><span class="question-num">39</span><span class="stmt">Welche Stadt hat 2025 als erste eine Tourismussteuer eingeführt?</span>
+                    <input type="text" name="l6" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">40</span><span class="stmt">Welche Universität hat die Studie zu Einheimischen in Tourismushotspots durchgeführt?</span>
+                    <input type="text" name="l7" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">41</span><span class="stmt">Wie viel Prozent der Deutschen wollen 2026 bewusster reisen?</span>
+                    <input type="text" name="l8" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">42</span><span class="stmt">An welcher Universität arbeitet Dr. Klaus Weber?</span>
+                    <input type="text" name="l9" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">43</span><span class="stmt">Nenne 3 Folgen des Massentourismus aus dem Text:</span>
+                    <input type="text" name="l10" placeholder="z.B. ___, ___, ___">
+                </div>
+            </div>
+
+            <!-- ============ 4. SPRECHEN ============ -->
+            <div class="exam-section" id="sprechen">
+                <h2>🗣️ 4. Sprechen — Dialog cu un coleg cursant (proba orală)</h2>
+                <div class="exam-meta"><span>⏱️ 5-7 min</span><span>📋 1 dialog în pereche</span><span>💯 15 puncte</span></div>
+
+                <p style="background: #fef3c7; padding: 12px 16px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                    <strong>Atenție:</strong> Această secțiune se desfășoară <strong>oral, în pereche cu un alt cursant</strong>. Examinatorul vă dă cartonașele cu rolul cu 1-2 minute înainte. Dacă numărul cursanților e impar, ultimul dialoghează cu examinatorul.
+                </p>
+
+                <div class="speaking-card">
+                    <h4>💬 Tema: „Pauschalreise vs. Individualreise — was passt zu wem?"</h4>
+                    <p>Doi prieteni planifică următoarea vacanță și discută stilurile lor de călătorie. <strong>Cursant A</strong> preferă <strong>Pauschalreise / All-Inclusive</strong> (confort, organizare, fără surprize, ideal cu copii), <strong>Cursant B</strong> preferă <strong>Individualreise / Backpacking</strong> (libertate, autenticitate, buget mic, contact local). Discutați argumentele, avantajele și dezavantajele fiecărui stil. Încercați să găsiți puncte comune.</p>
+                    <p>Discutați împreună timp de 5-7 minute, în mod natural, ca într-o conversație reală. Examinatorul poate pune întrebări clarificatoare.</p>
+                </div>
+
+                <div class="role-card">
+                    <strong class="role-label">🅰️ Cursant A — pro Pauschalreise & All-Inclusive</strong>
+                    <ul>
+                        <li>Apără confortul: „Alles im Preis inbegriffen — Flug, Hotel, Verpflegung", „keine Überraschungen"</li>
+                        <li>Vorbește despre organizare: Reisebüro plant alles, Transfer vom Flughafen inklusive, Reiseleiter vor Ort</li>
+                        <li>Atrage atenția asupra avantajelor pentru familii cu copii: animație, mese pentru copii, securitate</li>
+                        <li>Acceptă că poate fi mai puțin autentic — caută compromis cu cursant B</li>
+                    </ul>
+                </div>
+
+                <div class="role-card">
+                    <strong class="role-label">🅱️ Cursant B — pro Individualreise & Backpacking</strong>
+                    <ul>
+                        <li>Apără libertatea: „Ich entscheide selbst, was ich sehe und mache", „kein fester Reiseplan"</li>
+                        <li>Vorbește despre autenticitate: lokale Restaurants, Kontakt zur Bevölkerung, kulturelles Erlebnis</li>
+                        <li>Atrage atenția asupra costurilor: oft günstiger als Pauschalreisen, Hostels und Couchsurfing</li>
+                        <li>Acceptă că poate fi mai obositor de planificat — caută compromis cu cursant A</li>
+                    </ul>
+                </div>
+
+                <p style="margin-top: 16px; color: #6b7280; font-style: italic;">📊 Cotare (15p): realizarea sarcinii (5p) · coerență + fluență (4p) · vocabular (3p) · gramatică + pronunție (3p)</p>
+            </div>
+
+            <button class="submit-btn" onclick="submitExam()">📨 Trimite examenul</button>
+
+        </div>
+
+        <div class="submitted-message" id="submitted">
+            <h2>✓ Examenul a fost trimis!</h2>
+            <p>Ai finalizat Test 6 — Reisen & Tourismus.</p>
+            <p>Răspunsurile tale au fost salvate. <strong>Examinatorul</strong> îți va comunica scorul și rezultatul după ce verifică totul.</p>
+            <p style="margin-top: 24px; color: #991b1b; font-weight: 600;">Examen oficial — testul nu mai poate fi reluat.</p>
+            <p style="margin-top: 30px; font-size: 1.5rem;">ʚଓ</p>
+        </div>
+
+        <!-- Modal pentru identificare cursant -->
+        <div id="identity-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center;">
+            <div style="background:white; padding:30px 35px; border-radius:14px; max-width:480px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                <h2 style="color:#065f46; margin-top:0;">📝 Identificare cursant</h2>
+                <p style="color:#374151;">Înainte de a trimite examenul, te rog completează numele tău complet pentru ca examinatorul să poată corecta răspunsurile.</p>
+                <div style="margin:18px 0;">
+                    <label style="display:block; font-weight:600; color:#065f46; margin-bottom:6px;">Nume (de familie):</label>
+                    <input type="text" id="modal-nume" style="width:100%; padding:11px; border:2px solid #d1d5db; border-radius:8px; font-size:1rem; box-sizing:border-box;" placeholder="ex: Popescu" autocomplete="family-name">
+                </div>
+                <div style="margin:18px 0;">
+                    <label style="display:block; font-weight:600; color:#065f46; margin-bottom:6px;">Prenume:</label>
+                    <input type="text" id="modal-prenume" style="width:100%; padding:11px; border:2px solid #d1d5db; border-radius:8px; font-size:1rem; box-sizing:border-box;" placeholder="ex: Maria" autocomplete="given-name">
+                </div>
+                <div id="modal-error" style="color:#dc2626; font-size:0.9rem; margin:8px 0; display:none;">⚠️ Te rog completează ambele câmpuri.</div>
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                    <button onclick="cancelSubmit()" style="background:#6b7280; color:white; border:none; padding:11px 22px; border-radius:8px; cursor:pointer; font-weight:600;">Anulează</button>
+                    <button onclick="confirmSubmit()" style="background:#10B981; color:white; border:none; padding:11px 22px; border-radius:8px; cursor:pointer; font-weight:600;">✓ Trimite examenul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="test.js"></script>
+</body>
+</html>
