@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test 7 - Familie & Beziehungen - Examen B2</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .timer-bar { position: sticky; top: 0; z-index: 100; background: #065f46; color: white; padding: 12px 20px; text-align: center; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .timer-bar .time { font-size: 1.4rem; }
+        .exam-section { background: white; border: 2px solid #d1fae5; border-radius: 12px; padding: 24px; margin: 25px 0; }
+        .exam-section h2 { color: #065f46; border-bottom: 2px solid #10B981; padding-bottom: 10px; }
+        .exam-meta { display: flex; gap: 15px; flex-wrap: wrap; margin: 10px 0 20px; font-size: 0.9rem; color: #6b7280; }
+        .exam-meta span { background: #f0fdf4; padding: 4px 10px; border-radius: 6px; }
+
+        .question { margin: 18px 0; padding: 14px; background: #fafafa; border-radius: 8px; border-left: 3px solid #10B981; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .question .scroll-hint { display: none; }
+        .question .stmt { display: block; min-width: 100%; word-break: keep-all; }
+        @media (max-width: 640px) {
+            .question { white-space: nowrap; padding-bottom: 18px; position: relative; }
+            .question .stmt { display: inline-block; white-space: normal; min-width: max-content; max-width: 95vw; vertical-align: top; }
+            .question .scroll-hint { display: block; position: sticky; right: 0; bottom: 0; font-size: 0.72rem; color: #9ca3af; font-style: italic; padding-top: 6px; white-space: nowrap; }
+            .question input[type="text"] { white-space: normal; }
+            .mc-row { white-space: normal; }
+        }
+
+        .question-num { display: inline-block; background: #10B981; color: white; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; margin-right: 8px; flex-shrink: 0; }
+        .question input[type="text"] { width: 100%; padding: 9px; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 6px; font-size: 1rem; box-sizing: border-box; max-width: 100%; }
+        .question input[type="text"]:focus { border-color: #10B981; outline: none; }
+        .mc-row { margin: 6px 0; display: flex; align-items: flex-start; gap: 6px; }
+        .mc-row input[type="radio"] { margin-top: 4px; flex-shrink: 0; }
+        .mc-row label { flex: 1; }
+
+        .audio-player-exam { background: #eff6ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 14px; margin: 12px 0; }
+        .audio-player-exam button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-right: 8px; margin-bottom: 6px; }
+        .audio-player-exam .plays-left { color: #6b7280; font-size: 0.9rem; margin-left: 10px; }
+
+        .reading-text { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 18px 22px; border-radius: 8px; margin: 15px 0; line-height: 1.7; overflow-x: auto; }
+        .reading-text p { margin: 0.6em 0; }
+        .reading-text h3 { margin-top: 0; color: #92400e; }
+
+        .submit-btn { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: none; padding: 18px 40px; border-radius: 12px; font-size: 1.2rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35); display: block; margin: 40px auto; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45); }
+        .submitted-message { display: none; background: #d1fae5; border: 3px solid #10B981; border-radius: 12px; padding: 40px; text-align: center; }
+        .submitted-message h2 { color: #065f46; font-size: 2rem; margin-bottom: 15px; }
+        .submitted-message p { font-size: 1.15rem; color: #374151; }
+
+        .speaking-card { background: #f0fdf4; border-left: 4px solid #10B981; padding: 18px 22px; border-radius: 8px; margin: 15px 0; }
+        .speaking-card h4 { color: #065f46; margin-top: 0; }
+        .role-card { background: white; border: 2px dashed #10B981; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+        .role-card strong.role-label { color: #065f46; display: block; margin-bottom: 6px; }
+        .info-warning { background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 14px; margin: 18px 0; color: #78350f; font-weight: 600; text-align: center; }
+
+        .ortho-error-box { background: #fff7ed; border: 1px dashed #f59e0b; padding: 10px 14px; border-radius: 6px; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="timer-bar">
+        ⏱️ Timp rămas: <span class="time" id="timer">60:00</span> · Test 7 — Familie & Beziehungen · 100 puncte · Prag promovare 60%
+    </div>
+
+    <nav class="navbar">
+        <span class="navbar-logo">ʚଓ Claudia Toth</span>
+        <ul class="navbar-menu">
+            <li><a href="#grammatik">1. Grammatik</a></li>
+            <li><a href="#hoeren">2. Hörverstehen</a></li>
+            <li><a href="#lesen">3. Leseverstehen</a></li>
+            <li><a href="#sprechen">4. Sprechen</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>ʚଓ Test 7 — Familie & Beziehungen</h1>
+            <p class="subtitle">Examen B2 · Nivel mediu · 60 minute · 100 puncte (10 din oficiu)</p>
+            <p>Curs autorizat ANC · Claudia Toth · © 2026</p>
+        </div>
+
+        <div class="content" id="exam-content">
+
+            <div class="info-warning">
+                ⚠️ Citește toate întrebările cu atenție. La final apasă „Trimite examenul". <strong>Nu vei vedea scorul</strong> — corectarea o face examinatorul. Ai <strong>10 puncte din oficiu</strong>. <br>
+                <span style="color: #991b1b; font-weight: 700;">Examen oficial — odată trimis, NU mai poate fi reluat!</span>
+            </div>
+
+            <!-- ============ 1. GRAMMATIK ============ -->
+            <div class="exam-section" id="grammatik">
+                <h2>📝 1. Grammatik &amp; Rechtschreibung (Sprachbausteine + Ortografie)</h2>
+                <div class="exam-meta"><span>⏱️ 20 min</span><span>📋 25 itemi</span><span>💯 30 puncte</span></div>
+
+                <h3 style="color: #059669;">A. Konnektoren — completează cu cuvântul potrivit (5p)</h3>
+                <p style="color: #6b7280; font-style: italic;">Alege: weil · deshalb · obwohl · denn · trotzdem</p>
+
+                <div class="question"><span class="question-num">1</span><span class="stmt">Viele Paare heiraten nicht mehr, ____________ sie keinen Stempel brauchen.</span>
+                    <input type="text" name="g1" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">2</span><span class="stmt">____________ die Scheidungsrate hoch ist, heiraten viele Menschen weiterhin.</span>
+                    <input type="text" name="g2" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">3</span><span class="stmt">Patchworkfamilien sind häufig geworden, ____________ akzeptiert man sie heute völlig.</span>
+                    <input type="text" name="g3" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">4</span><span class="stmt">Andreea pflegt ihre Großmutter, ____________ sie ihr alles verdankt.</span>
+                    <input type="text" name="g4" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">5</span><span class="stmt">Die Vereinbarkeit Familie-Beruf ist schwer, ____________ bekommen viele Mütter noch Kinder.</span>
+                    <input type="text" name="g5" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">B. Prepoziții cu cazuri — alege varianta corectă (5p)</h3>
+
+                <div class="question"><span class="question-num">6</span><span class="stmt">Ich kümmere mich ____________ meine alten Eltern.</span>
+                    <div class="mc-row"><input type="radio" name="g6" value="a" id="g6a"><label for="g6a">a) für</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="b" id="g6b"><label for="g6b">b) an</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="c" id="g6c"><label for="g6c">c) um</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="d" id="g6d"><label for="g6d">d) auf</label></div>
+                </div>
+                <div class="question"><span class="question-num">7</span><span class="stmt">Andreea ist seit 5 Jahren ____________ Mihai verheiratet.</span>
+                    <div class="mc-row"><input type="radio" name="g7" value="a" id="g7a"><label for="g7a">a) zu</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="b" id="g7b"><label for="g7b">b) mit</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="c" id="g7c"><label for="g7c">c) bei</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="d" id="g7d"><label for="g7d">d) an</label></div>
+                </div>
+                <div class="question"><span class="question-num">8</span><span class="stmt">Carolina hat sich ____________ einen Kollegen verliebt.</span>
+                    <div class="mc-row"><input type="radio" name="g8" value="a" id="g8a"><label for="g8a">a) auf</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="b" id="g8b"><label for="g8b">b) in</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="c" id="g8c"><label for="g8c">c) mit</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="d" id="g8d"><label for="g8d">d) für</label></div>
+                </div>
+                <div class="question"><span class="question-num">9</span><span class="stmt">Wegen ____________ Scheidung war sie traurig.</span>
+                    <div class="mc-row"><input type="radio" name="g9" value="a" id="g9a"><label for="g9a">a) die</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="b" id="g9b"><label for="g9b">b) der</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="c" id="g9c"><label for="g9c">c) den</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="d" id="g9d"><label for="g9d">d) dem</label></div>
+                </div>
+                <div class="question"><span class="question-num">10</span><span class="stmt">Florian streitet sich oft ____________ seinem Bruder.</span>
+                    <div class="mc-row"><input type="radio" name="g10" value="a" id="g10a"><label for="g10a">a) mit</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="b" id="g10b"><label for="g10b">b) gegen</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="c" id="g10c"><label for="g10c">c) zu</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="d" id="g10d"><label for="g10d">d) auf</label></div>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">C. Aktiv → Passiv (Präsens) — transformă propoziția (10p)</h3>
+                <p style="color: #6b7280; font-style: italic;">Exemplu: Die Eltern erziehen die Kinder. → Die Kinder werden von den Eltern erzogen.</p>
+
+                <div class="question"><span class="question-num">11</span><span class="stmt">Aktiv: <em>Die Eltern erziehen die Kinder.</em><br>Passiv:</span>
+                    <input type="text" name="g11" placeholder="Die Kinder werden ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">12</span><span class="stmt">Aktiv: <em>Andreea heiratet Mihai im Sommer.</em><br>Passiv:</span>
+                    <input type="text" name="g12" placeholder="Mihai wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">13</span><span class="stmt">Aktiv: <em>Der Staat fördert die Familienpolitik.</em><br>Passiv:</span>
+                    <input type="text" name="g13" placeholder="Die Familienpolitik wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">14</span><span class="stmt">Aktiv: <em>Die Großeltern betreuen die Enkel.</em><br>Passiv:</span>
+                    <input type="text" name="g14" placeholder="Die Enkel werden ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">15</span><span class="stmt">Aktiv: <em>Eine gute Familie unterstützt die Kinder.</em><br>Passiv:</span>
+                    <input type="text" name="g15" placeholder="Die Kinder werden ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">D. Rechtschreibung — alege scrierea corectă (5p)</h3>
+
+                <div class="question"><span class="question-num">16</span><span class="stmt">die V____ter (tații)</span>
+                    <div class="mc-row"><input type="radio" name="o1" value="a" id="o1a"><label for="o1a">a) a — Vater</label></div>
+                    <div class="mc-row"><input type="radio" name="o1" value="b" id="o1b"><label for="o1b">b) ä — Väter</label></div>
+                    <div class="mc-row"><input type="radio" name="o1" value="c" id="o1c"><label for="o1c">c) e — Veter</label></div>
+                </div>
+                <div class="question"><span class="question-num">17</span><span class="stmt">die M____tter (mamele)</span>
+                    <div class="mc-row"><input type="radio" name="o2" value="a" id="o2a"><label for="o2a">a) u — Mutter</label></div>
+                    <div class="mc-row"><input type="radio" name="o2" value="b" id="o2b"><label for="o2b">b) ü — Mütter</label></div>
+                    <div class="mc-row"><input type="radio" name="o2" value="c" id="o2c"><label for="o2c">c) ie — Mietter</label></div>
+                </div>
+                <div class="question"><span class="question-num">18</span><span class="stmt">die Br____der (frații)</span>
+                    <div class="mc-row"><input type="radio" name="o3" value="a" id="o3a"><label for="o3a">a) u — Bruder</label></div>
+                    <div class="mc-row"><input type="radio" name="o3" value="b" id="o3b"><label for="o3b">b) ü — Brüder</label></div>
+                    <div class="mc-row"><input type="radio" name="o3" value="c" id="o3c"><label for="o3c">c) ie — Brieder</label></div>
+                </div>
+                <div class="question"><span class="question-num">19</span><span class="stmt">die gro____e Familie (familia mare)</span>
+                    <div class="mc-row"><input type="radio" name="o4" value="a" id="o4a"><label for="o4a">a) ss — grosse</label></div>
+                    <div class="mc-row"><input type="radio" name="o4" value="b" id="o4b"><label for="o4b">b) ß — große</label></div>
+                    <div class="mc-row"><input type="radio" name="o4" value="c" id="o4c"><label for="o4c">c) s — grose</label></div>
+                </div>
+                <div class="question"><span class="question-num">20</span><span class="stmt">die T____chter (fiicele)</span>
+                    <div class="mc-row"><input type="radio" name="o5" value="a" id="o5a"><label for="o5a">a) o — Tochter</label></div>
+                    <div class="mc-row"><input type="radio" name="o5" value="b" id="o5b"><label for="o5b">b) ö — Töchter</label></div>
+                    <div class="mc-row"><input type="radio" name="o5" value="c" id="o5c"><label for="o5c">c) e — Techter</label></div>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">E. Găsește greșeala — rescrie corect (5p)</h3>
+                <p style="color: #6b7280; font-style: italic;">În fiecare propoziție există <strong>o singură greșeală</strong> de ortografie (majusculă/minusculă sau literă greșită). Scrie cuvântul corect.</p>
+
+                <div class="question"><span class="question-num">21</span>
+                    <div class="ortho-error-box">Familie ist Wichtig für jeden Menschen.</div>
+                    <input type="text" name="o6" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">22</span>
+                    <div class="ortho-error-box">Meine eltern sind seit 30 Jahren verheiratet.</div>
+                    <input type="text" name="o7" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">23</span>
+                    <div class="ortho-error-box">Mein bruder lebt in Hamburg mit seiner Frau.</div>
+                    <input type="text" name="o8" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">24</span>
+                    <div class="ortho-error-box">Wir Teilen die Hausarbeit gerecht.</div>
+                    <input type="text" name="o9" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">25</span>
+                    <div class="ortho-error-box">Die Großeltern Helfen oft bei der Kinderbetreuung.</div>
+                    <input type="text" name="o10" placeholder="cuvântul corect">
+                </div>
+            </div>
+
+            <!-- ============ 2. HÖRVERSTEHEN ============ -->
+            <div class="exam-section" id="hoeren">
+                <h2>🎧 2. Hörverstehen</h2>
+                <div class="exam-meta"><span>⏱️ 10 min</span><span>📋 8 itemi</span><span>💯 20 puncte</span></div>
+
+                <h3 style="color: #059669;">Audio — Podcast „Familie 2026" cu psihologa familială Dr. Lisa Krüger (poți asculta de 2 ori)</h3>
+                <div class="audio-player-exam">
+                    <button onclick="playAudio('audio-1')">▶ Redă Audio</button>
+                    <button onclick="pauseAudio('audio-1')">⏸ Pauză</button>
+                    <span class="plays-left" id="plays-1">Ascultări rămase: 2</span>
+                    <audio id="audio-1" preload="none"><source src="audio/01-podcast-familie.mp3" type="audio/mpeg"></audio>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic;">Itemii 26-29: alege varianta corectă (3p fiecare = 12p)</p>
+
+                <div class="question"><span class="question-num">26</span><span class="stmt">Welcher Familientrend wächst laut Dr. Krüger am stärksten?</span>
+                    <div class="mc-row"><input type="radio" name="h1" value="a" id="h1a"><label for="h1a">a) Kernfamilie mit 3-4 Kindern</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="b" id="h1b"><label for="h1b">b) Patchworkfamilien und Alleinerziehende</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="c" id="h1c"><label for="h1c">c) Großfamilien mit Bauernhof</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="d" id="h1d"><label for="h1d">d) Familien ohne Eltern</label></div>
+                </div>
+                <div class="question"><span class="question-num">27</span><span class="stmt">Was ist laut Dr. Krüger das größte Problem für junge Familien?</span>
+                    <div class="mc-row"><input type="radio" name="h2" value="a" id="h2a"><label for="h2a">a) Zu wenige Kinder</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="b" id="h2b"><label for="h2b">b) Die Vereinbarkeit von Familie und Beruf</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="c" id="h2c"><label for="h2c">c) Zu viele Großeltern</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="d" id="h2d"><label for="h2d">d) Die Familienpolitik des Staates</label></div>
+                </div>
+                <div class="question"><span class="question-num">28</span><span class="stmt">Was empfiehlt sie für die Erziehung?</span>
+                    <div class="mc-row"><input type="radio" name="h3" value="a" id="h3a"><label for="h3a">a) Strenge Regeln und wenig Diskussion</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="b" id="h3b"><label for="h3b">b) Klare Grenzen plus offene Kommunikation</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="c" id="h3c"><label for="h3c">c) Komplette Freiheit für die Kinder</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="d" id="h3d"><label for="h3d">d) Mehr Bildschirmzeit</label></div>
+                </div>
+                <div class="question"><span class="question-num">29</span><span class="stmt">Was ist „Co-Parenting" laut Dr. Krüger?</span>
+                    <div class="mc-row"><input type="radio" name="h4" value="a" id="h4a"><label for="h4a">a) Wenn Großeltern die Erziehung übernehmen</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="b" id="h4b"><label for="h4b">b) Wenn geschiedene Eltern weiterhin gemeinsam erziehen</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="c" id="h4c"><label for="h4c">c) Wenn beide Eltern gleichzeitig arbeiten</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="d" id="h4d"><label for="h4d">d) Wenn Freunde mithelfen bei der Erziehung</label></div>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic; margin-top: 24px;">Itemii 30-33: bifează <strong>Richtig (R)</strong> sau <strong>Falsch (F)</strong> (2p fiecare = 8p)</p>
+
+                <div class="question"><span class="question-num">30</span><span class="stmt">Dr. Lisa Krüger arbeitet seit 20 Jahren als Familientherapeutin.</span>
+                    <div class="mc-row"><input type="radio" name="h5" value="R" id="h5r"><label for="h5r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h5" value="F" id="h5f"><label for="h5f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">31</span><span class="stmt">In Deutschland leben über 30% der Erwachsenen als Single.</span>
+                    <div class="mc-row"><input type="radio" name="h6" value="R" id="h6r"><label for="h6r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h6" value="F" id="h6f"><label for="h6f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">32</span><span class="stmt">Dr. Krüger findet, dass Pflegeheime immer besser sind als Pflege zu Hause.</span>
+                    <div class="mc-row"><input type="radio" name="h7" value="R" id="h7r"><label for="h7r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h7" value="F" id="h7f"><label for="h7f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">33</span><span class="stmt">Mehrgenerationenhäuser reduzieren die Vereinsamung im Alter.</span>
+                    <div class="mc-row"><input type="radio" name="h8" value="R" id="h8r"><label for="h8r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h8" value="F" id="h8f"><label for="h8f">F — Falsch</label></div>
+                </div>
+            </div>
+
+            <!-- ============ 3. LESEVERSTEHEN ============ -->
+            <div class="exam-section" id="lesen">
+                <h2>📖 3. Leseverstehen</h2>
+                <div class="exam-meta"><span>⏱️ 15 min</span><span>📋 10 itemi</span><span>💯 25 puncte</span></div>
+
+                <h3 style="color: #059669;">Text — Articol despre Patchworkfamilien în Germania (statistici 2025-2026)</h3>
+                <div class="reading-text">
+                    <h3>Patchworkfamilie in Deutschland — der neue Normalfall?</h3>
+                    <p>Im Jahr 2025 lebten in Deutschland laut <strong>Statistisches Bundesamt rund 2,1 Millionen Patchworkfamilien</strong> — fast doppelt so viele wie 2010. Damit ist die Patchworkfamilie inzwischen die zweithäufigste Familienform in Deutschland, direkt nach der klassischen Kernfamilie.</p>
+                    <p>Eine Studie der Universität Bremen aus dem Jahr 2026 zeigt überraschende Zahlen: <strong>32% aller Kinder unter 18 Jahren</strong> wachsen heute in einer Patchworkfamilie oder bei einem alleinerziehenden Elternteil auf. Vor 30 Jahren lag dieser Wert bei nur 12%. Die Familienformen werden vielfältiger, und die Akzeptanz in der Gesellschaft steigt deutlich.</p>
+                    <p>Aber das Familienleben ist nicht immer einfach. <strong>Die Scheidungsrate</strong> in Deutschland liegt seit 2024 bei rund 38%, was bedeutet: Fast vier von zehn Ehen werden früher oder später geschieden. Nach einer Trennung gründen viele Erwachsene eine neue Beziehung — oft mit Kindern aus früheren Partnerschaften. So entstehen die heutigen Patchworkfamilien.</p>
+                    <p>Die größte Herausforderung ist die <strong>Vereinbarkeit Familie-Beruf</strong>. Laut einer Umfrage der Bertelsmann-Stiftung geben <strong>67% der Mütter</strong> an, dass sie sich überlastet fühlen. Sie tragen oft eine Doppelbelastung: Vollzeit-Job plus Haushalt plus Kinderbetreuung. Auch in modernen Familien teilen viele Männer die Hausarbeit nicht gerecht.</p>
+                    <p>Trotzdem gibt es Hoffnung. Seit 2024 nehmen <strong>auch 41% der Väter Elternzeit</strong> — eine Verdoppelung in 10 Jahren. Das deutsche Familienministerium hat das Elterngeld erhöht und unterstützt aktiv die Vereinbarkeit von Familie und Beruf. Auch das Mehrgenerationenhaus, in dem Großeltern, Eltern und Kinder zusammenleben, wird wieder populärer.</p>
+                    <p>Dr. Lisa Krüger, Familientherapeutin in Berlin, erklärt: „Die moderne Familie ist nicht mehr definiert durch Form, sondern durch Liebe und Verantwortung. Patchwork, gleichgeschlechtliche Paare, Alleinerziehende — alle Formen sind gleichwertig, solange die Kinder geliebt werden."</p>
+                    <p>Wichtig sei vor allem die <strong>Kommunikation in der Familie</strong>. „Konflikte muss man offen besprechen. Kinder spüren, wenn etwas nicht stimmt — Ehrlichkeit ist die Basis jeder gesunden Familie", so Krüger. Ihr Rat an junge Eltern: Schafft Familienzeit jeden Tag, hört euren Kindern wirklich zu und teilt die Verantwortung fair.</p>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic;">Itemii 34-38: alege varianta corectă (3p fiecare = 15p)</p>
+
+                <div class="question"><span class="question-num">34</span><span class="stmt">Wie viele Patchworkfamilien gab es 2025 in Deutschland?</span>
+                    <div class="mc-row"><input type="radio" name="l1" value="a" id="l1a"><label for="l1a">a) 1 Million</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="b" id="l1b"><label for="l1b">b) Rund 2,1 Millionen</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="c" id="l1c"><label for="l1c">c) 5 Millionen</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="d" id="l1d"><label for="l1d">d) 10 Millionen</label></div>
+                </div>
+                <div class="question"><span class="question-num">35</span><span class="stmt">Wie viel Prozent der Kinder unter 18 wachsen in einer Patchworkfamilie oder mit einem Alleinerziehenden auf?</span>
+                    <div class="mc-row"><input type="radio" name="l2" value="a" id="l2a"><label for="l2a">a) 12%</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="b" id="l2b"><label for="l2b">b) 22%</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="c" id="l2c"><label for="l2c">c) 32%</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="d" id="l2d"><label for="l2d">d) 50%</label></div>
+                </div>
+                <div class="question"><span class="question-num">36</span><span class="stmt">Wie hoch ist die Scheidungsrate in Deutschland seit 2024?</span>
+                    <div class="mc-row"><input type="radio" name="l3" value="a" id="l3a"><label for="l3a">a) 18%</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="b" id="l3b"><label for="l3b">b) Rund 38%</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="c" id="l3c"><label for="l3c">c) 50%</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="d" id="l3d"><label for="l3d">d) 70%</label></div>
+                </div>
+                <div class="question"><span class="question-num">37</span><span class="stmt">Was ist die größte Herausforderung für moderne Familien?</span>
+                    <div class="mc-row"><input type="radio" name="l4" value="a" id="l4a"><label for="l4a">a) Zu wenig Geld</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="b" id="l4b"><label for="l4b">b) Die Vereinbarkeit Familie-Beruf</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="c" id="l4c"><label for="l4c">c) Zu viele Großeltern</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="d" id="l4d"><label for="l4d">d) Zu wenig Schule</label></div>
+                </div>
+                <div class="question"><span class="question-num">38</span><span class="stmt">Was sagt Dr. Lisa Krüger über moderne Familien?</span>
+                    <div class="mc-row"><input type="radio" name="l5" value="a" id="l5a"><label for="l5a">a) Nur die Kernfamilie ist gesund</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="b" id="l5b"><label for="l5b">b) Alle Formen sind gleichwertig, solange die Kinder geliebt werden</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="c" id="l5c"><label for="l5c">c) Patchwork ist immer schlecht für die Kinder</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="d" id="l5d"><label for="l5d">d) Großeltern sollten alles entscheiden</label></div>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic; margin-top: 24px;">Itemii 39-43: răspunde scurt (un cuvânt, o cifră sau o expresie) (2p fiecare = 10p)</p>
+
+                <div class="question"><span class="question-num">39</span><span class="stmt">Welche Institution liefert die Statistik zu den 2,1 Millionen Patchworkfamilien?</span>
+                    <input type="text" name="l6" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">40</span><span class="stmt">Welche Universität hat die Studie über Patchworkkinder durchgeführt?</span>
+                    <input type="text" name="l7" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">41</span><span class="stmt">Wie viel Prozent der Mütter fühlen sich überlastet (laut Bertelsmann-Stiftung)?</span>
+                    <input type="text" name="l8" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">42</span><span class="stmt">Wie viel Prozent der Väter nehmen seit 2024 Elternzeit?</span>
+                    <input type="text" name="l9" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">43</span><span class="stmt">Nenne 3 Ratschläge von Dr. Krüger für junge Eltern:</span>
+                    <input type="text" name="l10" placeholder="z.B. ___, ___, ___">
+                </div>
+            </div>
+
+            <!-- ============ 4. SPRECHEN ============ -->
+            <div class="exam-section" id="sprechen">
+                <h2>🗣️ 4. Sprechen — Dialog cu un coleg cursant (proba orală)</h2>
+                <div class="exam-meta"><span>⏱️ 5-7 min</span><span>📋 1 dialog în pereche</span><span>💯 15 puncte</span></div>
+
+                <p style="background: #fef3c7; padding: 12px 16px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                    <strong>Atenție:</strong> Această secțiune se desfășoară <strong>oral, în pereche cu un alt cursant</strong>. Examinatorul vă dă cartonașele cu rolul cu 1-2 minute înainte. Dacă numărul cursanților e impar, ultimul dialoghează cu examinatorul.
+                </p>
+
+                <div class="speaking-card">
+                    <h4>💬 Tema: „Kernfamilie vs. moderne Familienmodelle — was ist gesünder für die Kinder?"</h4>
+                    <p>Doi prieteni discută despre cum cresc copiii lor și ce model de familie funcționează mai bine. <strong>Cursant A</strong> apără <strong>Kernfamilie tradițională</strong> (mamă + tată + copii, căsătorie clasică, stabilitate, roluri clare), <strong>Cursant B</strong> apără <strong>modele moderne</strong> (Patchworkfamilie, Alleinerziehende, gleichgeschlechtliche Paare, Wahlfamilie — toate acceptate). Discutați argumentele, avantajele și dezavantajele fiecărui model. Încercați să găsiți puncte comune.</p>
+                    <p>Discutați împreună timp de 5-7 minute, în mod natural, ca într-o conversație reală. Examinatorul poate pune întrebări clarificatoare.</p>
+                </div>
+
+                <div class="role-card">
+                    <strong class="role-label">🅰️ Cursant A — pro Kernfamilie tradițională</strong>
+                    <ul>
+                        <li>Apără stabilitatea: „Mama + Papa + Kinder = klare Rollen", „Kinder brauchen Sicherheit"</li>
+                        <li>Vorbește despre tradiție: Großeltern als Vorbild, Ehe ca angajament pe viață, valori clare</li>
+                        <li>Atrage atenția asupra impactului divorțului pe copii: Sorgerechtsstreit, Vereinsamung, Trauma</li>
+                        <li>Acceptă că nu toți pot trăi așa — caută compromis cu cursant B</li>
+                    </ul>
+                </div>
+
+                <div class="role-card">
+                    <strong class="role-label">🅱️ Cursant B — pro modele moderne acceptate</strong>
+                    <ul>
+                        <li>Apără diversitatea: „Liebe ist wichtiger als Form", „Patchwork kann genauso glücklich sein"</li>
+                        <li>Vorbește despre realitate modernă: 38% Scheidungsrate, Alleinerziehende = realitate, Diversität de aceeași sex acceptată</li>
+                        <li>Atrage atenția asupra avantajelor: copilul învață Toleranz, Stiefgeschwister oferă socializare, Wahlfamilie oferă Vertrauen</li>
+                        <li>Acceptă că stabilitatea e importantă — caută compromis cu cursant A</li>
+                    </ul>
+                </div>
+
+                <p style="margin-top: 16px; color: #6b7280; font-style: italic;">📊 Cotare (15p): realizarea sarcinii (5p) · coerență + fluență (4p) · vocabular (3p) · gramatică + pronunție (3p)</p>
+            </div>
+
+            <button class="submit-btn" onclick="submitExam()">📨 Trimite examenul</button>
+
+        </div>
+
+        <div class="submitted-message" id="submitted">
+            <h2>✓ Examenul a fost trimis!</h2>
+            <p>Ai finalizat Test 7 — Familie & Beziehungen.</p>
+            <p>Răspunsurile tale au fost salvate. <strong>Examinatorul</strong> îți va comunica scorul și rezultatul după ce verifică totul.</p>
+            <p style="margin-top: 24px; color: #991b1b; font-weight: 600;">Examen oficial — testul nu mai poate fi reluat.</p>
+            <p style="margin-top: 30px; font-size: 1.5rem;">ʚଓ</p>
+        </div>
+
+        <!-- Modal pentru identificare cursant -->
+        <div id="identity-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center;">
+            <div style="background:white; padding:30px 35px; border-radius:14px; max-width:480px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                <h2 style="color:#065f46; margin-top:0;">📝 Identificare cursant</h2>
+                <p style="color:#374151;">Înainte de a trimite examenul, te rog completează numele tău complet pentru ca examinatorul să poată corecta răspunsurile.</p>
+                <div style="margin:18px 0;">
+                    <label style="display:block; font-weight:600; color:#065f46; margin-bottom:6px;">Nume (de familie):</label>
+                    <input type="text" id="modal-nume" style="width:100%; padding:11px; border:2px solid #d1d5db; border-radius:8px; font-size:1rem; box-sizing:border-box;" placeholder="ex: Popescu" autocomplete="family-name">
+                </div>
+                <div style="margin:18px 0;">
+                    <label style="display:block; font-weight:600; color:#065f46; margin-bottom:6px;">Prenume:</label>
+                    <input type="text" id="modal-prenume" style="width:100%; padding:11px; border:2px solid #d1d5db; border-radius:8px; font-size:1rem; box-sizing:border-box;" placeholder="ex: Maria" autocomplete="given-name">
+                </div>
+                <div id="modal-error" style="color:#dc2626; font-size:0.9rem; margin:8px 0; display:none;">⚠️ Te rog completează ambele câmpuri.</div>
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                    <button onclick="cancelSubmit()" style="background:#6b7280; color:white; border:none; padding:11px 22px; border-radius:8px; cursor:pointer; font-weight:600;">Anulează</button>
+                    <button onclick="confirmSubmit()" style="background:#10B981; color:white; border:none; padding:11px 22px; border-radius:8px; cursor:pointer; font-weight:600;">✓ Trimite examenul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="test.js"></script>
+</body>
+</html>
