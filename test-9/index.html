@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test 9 - Wohnen &amp; Stadtleben - Examen B2</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .timer-bar { position: sticky; top: 0; z-index: 100; background: #065f46; color: white; padding: 12px 20px; text-align: center; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .timer-bar .time { font-size: 1.4rem; }
+        .exam-section { background: white; border: 2px solid #d1fae5; border-radius: 12px; padding: 24px; margin: 25px 0; }
+        .exam-section h2 { color: #065f46; border-bottom: 2px solid #10B981; padding-bottom: 10px; }
+        .exam-meta { display: flex; gap: 15px; flex-wrap: wrap; margin: 10px 0 20px; font-size: 0.9rem; color: #6b7280; }
+        .exam-meta span { background: #f0fdf4; padding: 4px 10px; border-radius: 6px; }
+
+        .question { margin: 18px 0; padding: 14px; background: #fafafa; border-radius: 8px; border-left: 3px solid #10B981; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .question .scroll-hint { display: none; }
+        .question .stmt { display: block; min-width: 100%; word-break: keep-all; }
+        @media (max-width: 640px) {
+            .question { white-space: nowrap; padding-bottom: 18px; position: relative; }
+            .question .stmt { display: inline-block; white-space: normal; min-width: max-content; max-width: 95vw; vertical-align: top; }
+            .question .scroll-hint { display: block; position: sticky; right: 0; bottom: 0; font-size: 0.72rem; color: #9ca3af; font-style: italic; padding-top: 6px; white-space: nowrap; }
+            .question input[type="text"] { white-space: normal; }
+            .mc-row { white-space: normal; }
+        }
+
+        .question-num { display: inline-block; background: #10B981; color: white; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; margin-right: 8px; flex-shrink: 0; }
+        .question input[type="text"] { width: 100%; padding: 9px; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 6px; font-size: 1rem; box-sizing: border-box; max-width: 100%; }
+        .question input[type="text"]:focus { border-color: #10B981; outline: none; }
+        .mc-row { margin: 6px 0; display: flex; align-items: flex-start; gap: 6px; }
+        .mc-row input[type="radio"] { margin-top: 4px; flex-shrink: 0; }
+        .mc-row label { flex: 1; }
+
+        .audio-player-exam { background: #eff6ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 14px; margin: 12px 0; }
+        .audio-player-exam button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-right: 8px; margin-bottom: 6px; }
+        .audio-player-exam .plays-left { color: #6b7280; font-size: 0.9rem; margin-left: 10px; }
+
+        .reading-text { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 18px 22px; border-radius: 8px; margin: 15px 0; line-height: 1.7; overflow-x: auto; }
+        .reading-text p { margin: 0.6em 0; }
+        .reading-text h3 { margin-top: 0; color: #92400e; }
+
+        .submit-btn { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: none; padding: 18px 40px; border-radius: 12px; font-size: 1.2rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35); display: block; margin: 40px auto; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45); }
+        .submitted-message { display: none; background: #d1fae5; border: 3px solid #10B981; border-radius: 12px; padding: 40px; text-align: center; }
+        .submitted-message h2 { color: #065f46; font-size: 2rem; margin-bottom: 15px; }
+        .submitted-message p { font-size: 1.15rem; color: #374151; }
+
+        .speaking-card { background: #f0fdf4; border-left: 4px solid #10B981; padding: 18px 22px; border-radius: 8px; margin: 15px 0; }
+        .speaking-card h4 { color: #065f46; margin-top: 0; }
+        .role-card { background: white; border: 2px dashed #10B981; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+        .role-card strong.role-label { color: #065f46; display: block; margin-bottom: 6px; }
+        .info-warning { background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 14px; margin: 18px 0; color: #78350f; font-weight: 600; text-align: center; }
+
+        .ortho-error-box { background: #fff7ed; border: 1px dashed #f59e0b; padding: 10px 14px; border-radius: 6px; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="timer-bar">
+        ⏱️ Timp rămas: <span class="time" id="timer">60:00</span> · Test 9 — Wohnen &amp; Stadtleben · 100 puncte · Prag promovare 60%
+    </div>
+
+    <nav class="navbar">
+        <span class="navbar-logo">ʚଓ Claudia Toth</span>
+        <ul class="navbar-menu">
+            <li><a href="#grammatik">1. Grammatik</a></li>
+            <li><a href="#hoeren">2. Hörverstehen</a></li>
+            <li><a href="#lesen">3. Leseverstehen</a></li>
+            <li><a href="#sprechen">4. Sprechen</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>ʚଓ Test 9 — Wohnen &amp; Stadtleben</h1>
+            <p class="subtitle">Examen B2 · Nivel mediu · 60 minute · 100 puncte (10 din oficiu)</p>
+            <p>Curs autorizat ANC · Claudia Toth · © 2026</p>
+        </div>
+
+        <div class="content" id="exam-content">
+
+            <div class="info-warning">
+                ⚠️ Citește toate întrebările cu atenție. La final apasă „Trimite examenul". <strong>Nu vei vedea scorul</strong> — corectarea o face examinatorul. Ai <strong>10 puncte din oficiu</strong>. <br>
+                <span style="color: #991b1b; font-weight: 700;">Examen oficial — odată trimis, NU mai poate fi reluat!</span>
+            </div>
+
+            <!-- ============ 1. GRAMMATIK ============ -->
+            <div class="exam-section" id="grammatik">
+                <h2>📝 1. Grammatik &amp; Rechtschreibung (Sprachbausteine + Ortografie)</h2>
+                <div class="exam-meta"><span>⏱️ 20 min</span><span>📋 25 itemi</span><span>💯 30 puncte</span></div>
+
+                <h3 style="color: #059669;">A. Konnektoren — completează cu cuvântul potrivit (5p)</h3>
+                <p style="color: #6b7280; font-style: italic;">Alege: weil · deshalb · obwohl · denn · trotzdem</p>
+
+                <div class="question"><span class="question-num">1</span><span class="stmt">Andreea wohnt in einer kleinen Mietwohnung, ____________ die Mieten in Berlin extrem hoch sind.</span>
+                    <input type="text" name="g1" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">2</span><span class="stmt">____________ die Großstadt teuer ist, zieht es immer mehr junge Menschen dorthin.</span>
+                    <input type="text" name="g2" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">3</span><span class="stmt">In vielen Dörfern fehlen Ärzte und Geschäfte, ____________ ziehen viele junge Leute in die Stadt.</span>
+                    <input type="text" name="g3" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">4</span><span class="stmt">Mihai sucht eine Wohnung in der Vorstadt, ____________ er einen Garten und Ruhe haben möchte.</span>
+                    <input type="text" name="g4" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">5</span><span class="stmt">Die Mieten steigen jedes Jahr, ____________ unterschreiben viele Menschen einen Mietvertrag.</span>
+                    <input type="text" name="g5" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">B. Prepoziții cu cazuri — alege varianta corectă (5p)</h3>
+
+                <div class="question"><span class="question-num">6</span><span class="stmt">Wir suchen schon seit Monaten ____________ einer bezahlbaren Wohnung.</span>
+                    <div class="mc-row"><input type="radio" name="g6" value="a" id="g6a"><label for="g6a">a) für</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="b" id="g6b"><label for="g6b">b) nach</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="c" id="g6c"><label for="g6c">c) auf</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="d" id="g6d"><label for="g6d">d) mit</label></div>
+                </div>
+                <div class="question"><span class="question-num">7</span><span class="stmt">Sie wohnt seit Jahren ____________ dem Land und genießt die Ruhe.</span>
+                    <div class="mc-row"><input type="radio" name="g7" value="a" id="g7a"><label for="g7a">a) in</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="b" id="g7b"><label for="g7b">b) auf</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="c" id="g7c"><label for="g7c">c) an</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="d" id="g7d"><label for="g7d">d) bei</label></div>
+                </div>
+                <div class="question"><span class="question-num">8</span><span class="stmt">Wir machen uns Sorgen ____________ die steigenden Mieten in der Stadt.</span>
+                    <div class="mc-row"><input type="radio" name="g8" value="a" id="g8a"><label for="g8a">a) auf</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="b" id="g8b"><label for="g8b">b) für</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="c" id="g8c"><label for="g8c">c) um</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="d" id="g8d"><label for="g8d">d) über</label></div>
+                </div>
+                <div class="question"><span class="question-num">9</span><span class="stmt">Wegen ____________ Wohnungsnot in Berlin ziehen viele Leute in die Vororte.</span>
+                    <div class="mc-row"><input type="radio" name="g9" value="a" id="g9a"><label for="g9a">a) die</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="b" id="g9b"><label for="g9b">b) der</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="c" id="g9c"><label for="g9c">c) den</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="d" id="g9d"><label for="g9d">d) das</label></div>
+                </div>
+                <div class="question"><span class="question-num">10</span><span class="stmt">Trotz ____________ hohen Mietspiegels bleibt Berlin attraktiv.</span>
+                    <div class="mc-row"><input type="radio" name="g10" value="a" id="g10a"><label for="g10a">a) der</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="b" id="g10b"><label for="g10b">b) dem</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="c" id="g10c"><label for="g10c">c) den</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="d" id="g10d"><label for="g10d">d) des</label></div>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">C. Aktiv → Passiv (Präsens) — transformă propoziția (10p)</h3>
+                <p style="color: #6b7280; font-style: italic;">Exemplu: Der Vermieter unterschreibt den Mietvertrag. → Der Mietvertrag wird vom Vermieter unterschrieben.</p>
+
+                <div class="question"><span class="question-num">11</span><span class="stmt">Aktiv: <em>Der Vermieter unterschreibt den Mietvertrag.</em><br>Passiv:</span>
+                    <input type="text" name="g11" placeholder="Der Mietvertrag wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">12</span><span class="stmt">Aktiv: <em>Viele Investoren kaufen alte Wohnungen in der Innenstadt.</em><br>Passiv:</span>
+                    <input type="text" name="g12" placeholder="Alte Wohnungen werden ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">13</span><span class="stmt">Aktiv: <em>Die Stadt baut neue soziale Wohnungen.</em><br>Passiv:</span>
+                    <input type="text" name="g13" placeholder="Neue soziale Wohnungen werden ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">14</span><span class="stmt">Aktiv: <em>Der Mieter zahlt die Nebenkosten jeden Monat.</em><br>Passiv:</span>
+                    <input type="text" name="g14" placeholder="Die Nebenkosten werden ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">15</span><span class="stmt">Aktiv: <em>Die Architekten planen ein nachhaltiges Wohnviertel.</em><br>Passiv:</span>
+                    <input type="text" name="g15" placeholder="Ein nachhaltiges Wohnviertel wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">D. Rechtschreibung — alege scrierea corectă (5p)</h3>
+
+                <div class="question"><span class="question-num">16</span><span class="stmt">die D____rfer (satele)</span>
+                    <div class="mc-row"><input type="radio" name="o1" value="a" id="o1a"><label for="o1a">a) o — Dorfer</label></div>
+                    <div class="mc-row"><input type="radio" name="o1" value="b" id="o1b"><label for="o1b">b) ö — Dörfer</label></div>
+                    <div class="mc-row"><input type="radio" name="o1" value="c" id="o1c"><label for="o1c">c) e — Derfer</label></div>
+                </div>
+                <div class="question"><span class="question-num">17</span><span class="stmt">die St____dte (orașele)</span>
+                    <div class="mc-row"><input type="radio" name="o2" value="a" id="o2a"><label for="o2a">a) a — Stadte</label></div>
+                    <div class="mc-row"><input type="radio" name="o2" value="b" id="o2b"><label for="o2b">b) ä — Städte</label></div>
+                    <div class="mc-row"><input type="radio" name="o2" value="c" id="o2c"><label for="o2c">c) e — Stedte</label></div>
+                </div>
+                <div class="question"><span class="question-num">18</span><span class="stmt">die Grünfl____che (spațiul verde)</span>
+                    <div class="mc-row"><input type="radio" name="o3" value="a" id="o3a"><label for="o3a">a) a — Grünflache</label></div>
+                    <div class="mc-row"><input type="radio" name="o3" value="b" id="o3b"><label for="o3b">b) ä — Grünfläche</label></div>
+                    <div class="mc-row"><input type="radio" name="o3" value="c" id="o3c"><label for="o3c">c) e — Grünfleche</label></div>
+                </div>
+                <div class="question"><span class="question-num">19</span><span class="stmt">die Gro____stadt (orașul mare)</span>
+                    <div class="mc-row"><input type="radio" name="o4" value="a" id="o4a"><label for="o4a">a) ss — Grossstadt</label></div>
+                    <div class="mc-row"><input type="radio" name="o4" value="b" id="o4b"><label for="o4b">b) ß — Großstadt</label></div>
+                    <div class="mc-row"><input type="radio" name="o4" value="c" id="o4c"><label for="o4c">c) s — Grosstadt</label></div>
+                </div>
+                <div class="question"><span class="question-num">20</span><span class="stmt">die Nachhaltig____it (sustenabilitatea)</span>
+                    <div class="mc-row"><input type="radio" name="o5" value="a" id="o5a"><label for="o5a">a) ki — Nachhaltigkit</label></div>
+                    <div class="mc-row"><input type="radio" name="o5" value="b" id="o5b"><label for="o5b">b) ke — Nachhaltigkeit</label></div>
+                    <div class="mc-row"><input type="radio" name="o5" value="c" id="o5c"><label for="o5c">c) kä — Nachhaltigkät</label></div>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">E. Găsește greșeala — rescrie corect (5p)</h3>
+                <p style="color: #6b7280; font-style: italic;">În fiecare propoziție există <strong>o singură greșeală</strong> de ortografie (majusculă/minusculă sau literă greșită). Scrie cuvântul corect.</p>
+
+                <div class="question"><span class="question-num">21</span>
+                    <div class="ortho-error-box">Die mieten in München sind sehr hoch.</div>
+                    <input type="text" name="o6" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">22</span>
+                    <div class="ortho-error-box">Wohnen auf dem Land ist Günstiger als in der Stadt.</div>
+                    <input type="text" name="o7" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">23</span>
+                    <div class="ortho-error-box">Florian Pendelt jeden Tag zur Arbeit.</div>
+                    <input type="text" name="o8" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">24</span>
+                    <div class="ortho-error-box">Die kaution beträgt drei Monatsmieten.</div>
+                    <input type="text" name="o9" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">25</span>
+                    <div class="ortho-error-box">Smart Homes Sparen viel Energie.</div>
+                    <input type="text" name="o10" placeholder="cuvântul corect">
+                </div>
+            </div>
+
+            <!-- ============ 2. HÖRVERSTEHEN ============ -->
+            <div class="exam-section" id="hoeren">
+                <h2>🎧 2. Hörverstehen</h2>
+                <div class="exam-meta"><span>⏱️ 10 min</span><span>📋 8 itemi</span><span>💯 20 puncte</span></div>
+
+                <h3 style="color: #059669;">Audio — Podcast „Wohnen 2026" cu arhitecta-urbanistă Dr. Sabine Berger (poți asculta de 2 ori)</h3>
+                <div class="audio-player-exam">
+                    <button onclick="playAudio('audio-1')">▶ Redă Audio</button>
+                    <button onclick="pauseAudio('audio-1')">⏸ Pauză</button>
+                    <span class="plays-left" id="plays-1">Ascultări rămase: 2</span>
+                    <audio id="audio-1" preload="none"><source src="audio/01-podcast-wohnen.mp3" type="audio/mpeg"></audio>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic;">Itemii 26-29: alege varianta corectă (3p fiecare = 12p)</p>
+
+                <div class="question"><span class="question-num">26</span><span class="stmt">Wie viele Jahre arbeitet Dr. Berger als Architektin und Stadtplanerin?</span>
+                    <div class="mc-row"><input type="radio" name="h1" value="a" id="h1a"><label for="h1a">a) 5 Jahre</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="b" id="h1b"><label for="h1b">b) 10 Jahre</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="c" id="h1c"><label for="h1c">c) 20 Jahre</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="d" id="h1d"><label for="h1d">d) 30 Jahre</label></div>
+                </div>
+                <div class="question"><span class="question-num">27</span><span class="stmt">Welches ist laut Dr. Berger das größte Problem auf dem deutschen Wohnungsmarkt?</span>
+                    <div class="mc-row"><input type="radio" name="h2" value="a" id="h2a"><label for="h2a">a) Wohnungsnot und Mietsteigerung in den Großstädten</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="b" id="h2b"><label for="h2b">b) Zu viele leere Häuser auf dem Land</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="c" id="h2c"><label for="h2c">c) Schlechte Bauqualität der Neubauten</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="d" id="h2d"><label for="h2d">d) Fehlende Architekten</label></div>
+                </div>
+                <div class="question"><span class="question-num">28</span><span class="stmt">Was empfiehlt Dr. Berger gegen die Wohnungsnot?</span>
+                    <div class="mc-row"><input type="radio" name="h3" value="a" id="h3a"><label for="h3a">a) Mehr sozialen Wohnungsbau und Mietendeckel</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="b" id="h3b"><label for="h3b">b) Alle Menschen aufs Land schicken</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="c" id="h3c"><label for="h3c">c) Nur teure Luxuswohnungen bauen</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="d" id="h3d"><label for="h3d">d) Häuser komplett verbieten</label></div>
+                </div>
+                <div class="question"><span class="question-num">29</span><span class="stmt">Was bedeutet „Tiny House" laut Dr. Berger?</span>
+                    <div class="mc-row"><input type="radio" name="h4" value="a" id="h4a"><label for="h4a">a) Ein riesiges Einfamilienhaus mit Pool</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="b" id="h4b"><label for="h4b">b) Ein sehr kleines Haus, oft mobil, mit 20-30 Quadratmetern</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="c" id="h4c"><label for="h4c">c) Ein Hochhaus mit 50 Stockwerken</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="d" id="h4d"><label for="h4d">d) Ein altes Bauernhaus auf dem Land</label></div>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic; margin-top: 24px;">Itemii 30-33: bifează <strong>Richtig (R)</strong> sau <strong>Falsch (F)</strong> (2p fiecare = 8p)</p>
+
+                <div class="question"><span class="question-num">30</span><span class="stmt">Laut Dr. Berger sind die Mieten in deutschen Großstädten seit 2010 um durchschnittlich 80% gestiegen.</span>
+                    <div class="mc-row"><input type="radio" name="h5" value="R" id="h5r"><label for="h5r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h5" value="F" id="h5f"><label for="h5f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">31</span><span class="stmt">Dr. Berger empfiehlt, dass alle jungen Menschen aufs Land ziehen sollten.</span>
+                    <div class="mc-row"><input type="radio" name="h6" value="R" id="h6r"><label for="h6r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h6" value="F" id="h6f"><label for="h6f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">32</span><span class="stmt">Laut Dr. Berger ist nachhaltiges Bauen ein wichtiger Trend für die Zukunft.</span>
+                    <div class="mc-row"><input type="radio" name="h7" value="R" id="h7r"><label for="h7r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h7" value="F" id="h7f"><label for="h7f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">33</span><span class="stmt">Dr. Berger meint, dass Smart Homes nur etwas für reiche Menschen sind.</span>
+                    <div class="mc-row"><input type="radio" name="h8" value="R" id="h8r"><label for="h8r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h8" value="F" id="h8f"><label for="h8f">F — Falsch</label></div>
+                </div>
+            </div>
+
+            <!-- ============ 3. LESEVERSTEHEN ============ -->
+            <div class="exam-section" id="lesen">
+                <h2>📖 3. Leseverstehen</h2>
+                <div class="exam-meta"><span>⏱️ 15 min</span><span>📋 10 itemi</span><span>💯 25 puncte</span></div>
+
+                <h3 style="color: #059669;">Text — Articol despre Wohnungsnot &amp; Gentrifizierung în Germania (studii 2025-2026)</h3>
+                <div class="reading-text">
+                    <h3>Wohnungsnot, Mietspiegel und Gentrifizierung — die größten Herausforderungen am deutschen Wohnungsmarkt</h3>
+                    <p>Im Jahr 2025 hat eine Studie des <strong>Pestel-Instituts</strong> alarmierende Zahlen veröffentlicht: In Deutschland fehlen aktuell rund <strong>910.000 Wohnungen</strong>, vor allem in den großen Städten. Berlin, München, Hamburg, Frankfurt und Köln gehören zu den Metropolen, in denen bezahlbarer Wohnraum besonders knapp ist. Die Wohnungsnot ist damit eines der dringendsten sozialen Probleme der Bundesrepublik.</p>
+                    <p>Eine Untersuchung des <strong>Deutschen Mieterbundes</strong> aus dem Jahr 2026 zeigt: Die Mieten in deutschen Großstädten sind seit 2010 um <strong>durchschnittlich 65%</strong> gestiegen. In München kostet die Kaltmiete im Schnitt 22 Euro pro Quadratmeter, in Berlin liegt sie bei 15 Euro. Vor zehn Jahren waren diese Werte fast halb so hoch. Hinzu kommen die Nebenkosten — Strom, Heizung, Wasser, Müll — die jedes Jahr weiter steigen.</p>
+                    <p>Ein besonders umstrittenes Phänomen ist die <strong>Gentrifizierung</strong>: alte Stadtviertel werden saniert, Investoren kaufen günstige Häuser, modernisieren sie und vermieten oder verkaufen sie viel teurer. Die ursprünglichen Bewohner — oft Familien mit niedrigem Einkommen — können sich die neuen Mieten nicht mehr leisten und müssen wegziehen. Laut <strong>einer Bitkom-Studie 2026</strong> haben <strong>48% der Mieter</strong> in deutschen Großstädten Angst, sich ihre Wohnung in fünf Jahren nicht mehr leisten zu können.</p>
+                    <p>Parallel dazu erleben viele ländliche Regionen eine <strong>Landflucht</strong>: junge Menschen ziehen in die Städte, weil dort Arbeitsplätze, Universitäten und kulturelles Leben warten. In manchen Dörfern Ostdeutschlands stehen heute bis zu <strong>30% der Häuser leer</strong>. Geschäfte schließen, Ärzte fehlen, öffentlicher Nahverkehr wird seltener.</p>
+                    <p>Aber es gibt auch positive Trends. <strong>Co-Living</strong> und <strong>Wohngemeinschaften (WG)</strong> werden bei jungen Erwachsenen immer beliebter — gemeinsam wohnen, Kosten teilen, sozialen Anschluss finden. Im Jahr 2025 lebten laut Statistischem Bundesamt rund <strong>3,1 Millionen Deutsche</strong> in WGs oder Co-Living-Projekten.</p>
+                    <p>Auch das <strong>Tiny House</strong> ist im Kommen: ein winziges, oft mobiles Haus mit 20 bis 30 Quadratmetern, das nachhaltig, günstig und flexibel ist. Wer mutig genug ist, baut sich seine eigene kleine Welt — auf einem gepachteten Grundstück am Rande einer Kleinstadt oder mitten in der Natur.</p>
+                    <p>Dr. Sabine Berger, Architektin und Stadtplanerin an der TU Berlin, erklärt: „Die größte Lösung gegen die Wohnungsnot ist mehr sozialer Wohnungsbau, gekoppelt mit einem effektiven Mietendeckel. Außerdem sollten wir den ländlichen Raum stärken, damit nicht alle in die Großstädte ziehen müssen."</p>
+                    <p>Ihr Rat an junge Mieter: Lest den Mietspiegel eurer Stadt, prüft genau Kaltmiete plus Nebenkosten, fragt nach der Kaution, schaut euch das Viertel und den Nahverkehr an. „Eine Wohnung ist nicht nur ein Vertrag — sie ist eine Lebensentscheidung. Wer informiert ist, vermeidet böse Überraschungen", so Berger.</p>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic;">Itemii 34-38: alege varianta corectă (3p fiecare = 15p)</p>
+
+                <div class="question"><span class="question-num">34</span><span class="stmt">Wie viele Wohnungen fehlen laut Pestel-Institut in Deutschland (2025)?</span>
+                    <div class="mc-row"><input type="radio" name="l1" value="a" id="l1a"><label for="l1a">a) 100.000</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="b" id="l1b"><label for="l1b">b) 450.000</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="c" id="l1c"><label for="l1c">c) 910.000</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="d" id="l1d"><label for="l1d">d) 2 Millionen</label></div>
+                </div>
+                <div class="question"><span class="question-num">35</span><span class="stmt">Um wie viel Prozent sind die Mieten in Großstädten seit 2010 gestiegen (Mieterbund 2026)?</span>
+                    <div class="mc-row"><input type="radio" name="l2" value="a" id="l2a"><label for="l2a">a) 10%</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="b" id="l2b"><label for="l2b">b) 30%</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="c" id="l2c"><label for="l2c">c) Durchschnittlich 65%</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="d" id="l2d"><label for="l2d">d) 200%</label></div>
+                </div>
+                <div class="question"><span class="question-num">36</span><span class="stmt">Wie viel Prozent der Mieter in Großstädten haben Angst, sich ihre Wohnung in 5 Jahren nicht mehr leisten zu können?</span>
+                    <div class="mc-row"><input type="radio" name="l3" value="a" id="l3a"><label for="l3a">a) 12%</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="b" id="l3b"><label for="l3b">b) 48%</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="c" id="l3c"><label for="l3c">c) 70%</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="d" id="l3d"><label for="l3d">d) 95%</label></div>
+                </div>
+                <div class="question"><span class="question-num">37</span><span class="stmt">Was sind positive Trends laut Text?</span>
+                    <div class="mc-row"><input type="radio" name="l4" value="a" id="l4a"><label for="l4a">a) Co-Living, Wohngemeinschaften und Tiny Houses</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="b" id="l4b"><label for="l4b">b) Mehr Luxuswohnungen</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="c" id="l4c"><label for="l4c">c) Höhere Mieten überall</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="d" id="l4d"><label for="l4d">d) Verbot von Wohngemeinschaften</label></div>
+                </div>
+                <div class="question"><span class="question-num">38</span><span class="stmt">Was empfiehlt Dr. Berger als wichtigste Lösung gegen die Wohnungsnot?</span>
+                    <div class="mc-row"><input type="radio" name="l5" value="a" id="l5a"><label for="l5a">a) Mehr Luxushochhäuser bauen</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="b" id="l5b"><label for="l5b">b) Mehr sozialer Wohnungsbau mit Mietendeckel</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="c" id="l5c"><label for="l5c">c) Alle Mieter sollen aufs Land ziehen</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="d" id="l5d"><label for="l5d">d) Häuser verbieten</label></div>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic; margin-top: 24px;">Itemii 39-43: răspunde scurt (un cuvânt, o cifră sau o expresie) (2p fiecare = 10p)</p>
+
+                <div class="question"><span class="question-num">39</span><span class="stmt">Welches Institut hat die Studie zum Wohnungsmangel veröffentlicht?</span>
+                    <input type="text" name="l6" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">40</span><span class="stmt">Wie viel kostet die Kaltmiete in München durchschnittlich pro Quadratmeter?</span>
+                    <input type="text" name="l7" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">41</span><span class="stmt">Wie viel Prozent der Häuser stehen in manchen ostdeutschen Dörfern leer?</span>
+                    <input type="text" name="l8" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">42</span><span class="stmt">An welcher Universität arbeitet Dr. Sabine Berger?</span>
+                    <input type="text" name="l9" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">43</span><span class="stmt">Nenne 3 Aspekte, die Dr. Berger jungen Mietern empfiehlt zu prüfen:</span>
+                    <input type="text" name="l10" placeholder="z.B. ___, ___, ___">
+                </div>
+            </div>
+
+            <!-- ============ 4. SPRECHEN ============ -->
+            <div class="exam-section" id="sprechen">
+                <h2>🗣️ 4. Sprechen — Dialog cu un coleg cursant (proba orală)</h2>
+                <div class="exam-meta"><span>⏱️ 5-7 min</span><span>📋 1 dialog în pereche</span><span>💯 15 puncte</span></div>
+
+                <p style="background: #fef3c7; padding: 12px 16px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                    <strong>Atenție:</strong> Această secțiune se desfășoară <strong>oral, în pereche cu un alt cursant</strong>. Examinatorul vă dă cartonașele cu rolul cu 1-2 minute înainte. Dacă numărul cursanților e impar, ultimul dialoghează cu examinatorul.
+                </p>
+
+                <div class="speaking-card">
+                    <h4>💬 Tema: „Wohnen in der Großstadt vs. auf dem Land — was ist besser?"</h4>
+                    <p>Doi prieteni discută unde să se mute. <strong>Cursant A</strong> apără <strong>Wohnen in der Großstadt</strong> (Mietwohnung sau WG, Nahverkehr, Einkaufsmöglichkeiten, Kultur, Karriere), <strong>Cursant B</strong> apără <strong>Wohnen auf dem Land</strong> (Einfamilienhaus sau Reihenhaus, Ruhe, Natur, Garten, günstiger). Discutați argumentele, avantajele și dezavantajele. Încercați să găsiți puncte comune sau un compromis (de exemplu Vorort).</p>
+                    <p>Discutați împreună timp de 5-7 minute, în mod natural, ca într-o conversație reală. Examinatorul poate pune întrebări clarificatoare.</p>
+                </div>
+
+                <div class="role-card">
+                    <strong class="role-label">🅰️ Cursant A — pro Großstadt</strong>
+                    <ul>
+                        <li>Apără infrastructura: „In der Großstadt gibt es einen ausgezeichneten Nahverkehr, viele Bahnhöfe, U-Bahn, Bus"</li>
+                        <li>Vorbește despre Karriere și studii: universități, joburi, Berufsmöglichkeiten, internaționale companii</li>
+                        <li>Mentionează cultura: Theater, Museen, Restaurants, Konzerte, diverse Viertel</li>
+                        <li>Acceptă probleme: Wohnungsnot, hohe Mieten, Lärm, Gentrifizierung — caută compromis cu cursant B (Vorort?)</li>
+                    </ul>
+                </div>
+
+                <div class="role-card">
+                    <strong class="role-label">🅱️ Cursant B — pro Land / Dorf</strong>
+                    <ul>
+                        <li>Apără liniștea și natura: „Auf dem Land hat man Ruhe, Grünflächen, frische Luft"</li>
+                        <li>Vorbește despre prețuri: günstigere Miete, eigenes Haus möglich, Garten, mehr Platz für die Familie</li>
+                        <li>Mentionează comunitatea: Nachbarn kennt man, weniger Stress, sicherer für Kinder</li>
+                        <li>Acceptă dezavantaje: schlechter Nahverkehr, weniger Einkaufsmöglichkeiten, Landflucht — caută compromis (Pendeln + Vorort?)</li>
+                    </ul>
+                </div>
+
+                <p style="margin-top: 16px; color: #6b7280; font-style: italic;">📊 Cotare (15p): realizarea sarcinii (5p) · coerență + fluență (4p) · vocabular (3p) · gramatică + pronunție (3p)</p>
+            </div>
+
+            <button class="submit-btn" onclick="submitExam()">📨 Trimite examenul</button>
+
+        </div>
+
+        <div class="submitted-message" id="submitted">
+            <h2>✓ Examenul a fost trimis!</h2>
+            <p>Ai finalizat Test 9 — Wohnen &amp; Stadtleben.</p>
+            <p>Răspunsurile tale au fost salvate. <strong>Examinatorul</strong> îți va comunica scorul și rezultatul după ce verifică totul.</p>
+            <p style="margin-top: 24px; color: #991b1b; font-weight: 600;">Examen oficial — testul nu mai poate fi reluat.</p>
+            <p style="margin-top: 30px; font-size: 1.5rem;">ʚଓ</p>
+        </div>
+
+        <!-- Modal pentru identificare cursant -->
+        <div id="identity-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center;">
+            <div style="background:white; padding:30px 35px; border-radius:14px; max-width:480px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                <h2 style="color:#065f46; margin-top:0;">📝 Identificare cursant</h2>
+                <p style="color:#374151;">Înainte de a trimite examenul, te rog completează numele tău complet pentru ca examinatorul să poată corecta răspunsurile.</p>
+                <div style="margin:18px 0;">
+                    <label style="display:block; font-weight:600; color:#065f46; margin-bottom:6px;">Nume (de familie):</label>
+                    <input type="text" id="modal-nume" style="width:100%; padding:11px; border:2px solid #d1d5db; border-radius:8px; font-size:1rem; box-sizing:border-box;" placeholder="ex: Popescu" autocomplete="family-name">
+                </div>
+                <div style="margin:18px 0;">
+                    <label style="display:block; font-weight:600; color:#065f46; margin-bottom:6px;">Prenume:</label>
+                    <input type="text" id="modal-prenume" style="width:100%; padding:11px; border:2px solid #d1d5db; border-radius:8px; font-size:1rem; box-sizing:border-box;" placeholder="ex: Maria" autocomplete="given-name">
+                </div>
+                <div id="modal-error" style="color:#dc2626; font-size:0.9rem; margin:8px 0; display:none;">⚠️ Te rog completează ambele câmpuri.</div>
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                    <button onclick="cancelSubmit()" style="background:#6b7280; color:white; border:none; padding:11px 22px; border-radius:8px; cursor:pointer; font-weight:600;">Anulează</button>
+                    <button onclick="confirmSubmit()" style="background:#10B981; color:white; border:none; padding:11px 22px; border-radius:8px; cursor:pointer; font-weight:600;">✓ Trimite examenul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="test.js"></script>
+</body>
+</html>
