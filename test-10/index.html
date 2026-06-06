@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test 10 - Kultur &amp; Freizeit - Examen B2</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .timer-bar { position: sticky; top: 0; z-index: 100; background: #065f46; color: white; padding: 12px 20px; text-align: center; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .timer-bar .time { font-size: 1.4rem; }
+        .exam-section { background: white; border: 2px solid #d1fae5; border-radius: 12px; padding: 24px; margin: 25px 0; }
+        .exam-section h2 { color: #065f46; border-bottom: 2px solid #10B981; padding-bottom: 10px; }
+        .exam-meta { display: flex; gap: 15px; flex-wrap: wrap; margin: 10px 0 20px; font-size: 0.9rem; color: #6b7280; }
+        .exam-meta span { background: #f0fdf4; padding: 4px 10px; border-radius: 6px; }
+
+        .question { margin: 18px 0; padding: 14px; background: #fafafa; border-radius: 8px; border-left: 3px solid #10B981; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .question .scroll-hint { display: none; }
+        .question .stmt { display: block; min-width: 100%; word-break: keep-all; }
+        @media (max-width: 640px) {
+            .question { white-space: nowrap; padding-bottom: 18px; position: relative; }
+            .question .stmt { display: inline-block; white-space: normal; min-width: max-content; max-width: 95vw; vertical-align: top; }
+            .question .scroll-hint { display: block; position: sticky; right: 0; bottom: 0; font-size: 0.72rem; color: #9ca3af; font-style: italic; padding-top: 6px; white-space: nowrap; }
+            .question input[type="text"] { white-space: normal; }
+            .mc-row { white-space: normal; }
+        }
+
+        .question-num { display: inline-block; background: #10B981; color: white; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; margin-right: 8px; flex-shrink: 0; }
+        .question input[type="text"] { width: 100%; padding: 9px; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 6px; font-size: 1rem; box-sizing: border-box; max-width: 100%; }
+        .question input[type="text"]:focus { border-color: #10B981; outline: none; }
+        .mc-row { margin: 6px 0; display: flex; align-items: flex-start; gap: 6px; }
+        .mc-row input[type="radio"] { margin-top: 4px; flex-shrink: 0; }
+        .mc-row label { flex: 1; }
+
+        .audio-player-exam { background: #eff6ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 14px; margin: 12px 0; }
+        .audio-player-exam button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-right: 8px; margin-bottom: 6px; }
+        .audio-player-exam .plays-left { color: #6b7280; font-size: 0.9rem; margin-left: 10px; }
+
+        .reading-text { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 18px 22px; border-radius: 8px; margin: 15px 0; line-height: 1.7; overflow-x: auto; }
+        .reading-text p { margin: 0.6em 0; }
+        .reading-text h3 { margin-top: 0; color: #92400e; }
+
+        .submit-btn { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: none; padding: 18px 40px; border-radius: 12px; font-size: 1.2rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35); display: block; margin: 40px auto; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45); }
+        .submitted-message { display: none; background: #d1fae5; border: 3px solid #10B981; border-radius: 12px; padding: 40px; text-align: center; }
+        .submitted-message h2 { color: #065f46; font-size: 2rem; margin-bottom: 15px; }
+        .submitted-message p { font-size: 1.15rem; color: #374151; }
+
+        .speaking-card { background: #f0fdf4; border-left: 4px solid #10B981; padding: 18px 22px; border-radius: 8px; margin: 15px 0; }
+        .speaking-card h4 { color: #065f46; margin-top: 0; }
+        .role-card { background: white; border: 2px dashed #10B981; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+        .role-card strong.role-label { color: #065f46; display: block; margin-bottom: 6px; }
+        .info-warning { background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 14px; margin: 18px 0; color: #78350f; font-weight: 600; text-align: center; }
+
+        .ortho-error-box { background: #fff7ed; border: 1px dashed #f59e0b; padding: 10px 14px; border-radius: 6px; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="timer-bar">
+        ⏱️ Timp rămas: <span class="time" id="timer">60:00</span> · Test 10 — Kultur &amp; Freizeit · 100 puncte · Prag promovare 60%
+    </div>
+
+    <nav class="navbar">
+        <span class="navbar-logo">ʚଓ Claudia Toth</span>
+        <ul class="navbar-menu">
+            <li><a href="#grammatik">1. Grammatik</a></li>
+            <li><a href="#hoeren">2. Hörverstehen</a></li>
+            <li><a href="#lesen">3. Leseverstehen</a></li>
+            <li><a href="#sprechen">4. Sprechen</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>ʚଓ Test 10 — Kultur &amp; Freizeit</h1>
+            <p class="subtitle">Examen B2 · Nivel mediu · 60 minute · 100 puncte (10 din oficiu)</p>
+            <p>Curs autorizat ANC · Claudia Toth · © 2026</p>
+        </div>
+
+        <div class="content" id="exam-content">
+
+            <div class="info-warning">
+                ⚠️ Citește toate întrebările cu atenție. La final apasă „Trimite examenul". <strong>Nu vei vedea scorul</strong> — corectarea o face examinatorul. Ai <strong>10 puncte din oficiu</strong>. <br>
+                <span style="color: #991b1b; font-weight: 700;">Examen oficial — odată trimis, NU mai poate fi reluat!</span>
+            </div>
+
+            <!-- ============ 1. GRAMMATIK ============ -->
+            <div class="exam-section" id="grammatik">
+                <h2>📝 1. Grammatik &amp; Rechtschreibung (Sprachbausteine + Ortografie)</h2>
+                <div class="exam-meta"><span>⏱️ 20 min</span><span>📋 25 itemi</span><span>💯 30 puncte</span></div>
+
+                <h3 style="color: #059669;">A. Konnektoren — completează cu cuvântul potrivit (5p)</h3>
+                <p style="color: #6b7280; font-style: italic;">Alege: weil · deshalb · obwohl · denn · trotzdem</p>
+
+                <div class="question"><span class="question-num">1</span><span class="stmt">Andreea geht jeden Monat ins Theater, ____________ sie die klassische Kultur liebt.</span>
+                    <input type="text" name="g1" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">2</span><span class="stmt">____________ Streaming-Dienste sehr beliebt sind, gehen viele Menschen noch ins Kino.</span>
+                    <input type="text" name="g2" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">3</span><span class="stmt">Mihai möchte fit bleiben, ____________ geht er dreimal pro Woche ins Fitnessstudio.</span>
+                    <input type="text" name="g3" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">4</span><span class="stmt">Florian sammelt seit 20 Jahren Briefmarken, ____________ es ihm Freude macht.</span>
+                    <input type="text" name="g4" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">5</span><span class="stmt">Konzerttickets sind sehr teuer geworden, ____________ kaufen viele Fans sie trotzdem.</span>
+                    <input type="text" name="g5" placeholder="weil / deshalb / obwohl / denn / trotzdem">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">B. Prepoziții cu cazuri — alege varianta corectă (5p)</h3>
+
+                <div class="question"><span class="question-num">6</span><span class="stmt">Ich interessiere mich sehr ____________ moderne Kunst.</span>
+                    <div class="mc-row"><input type="radio" name="g6" value="a" id="g6a"><label for="g6a">a) auf</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="b" id="g6b"><label for="g6b">b) für</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="c" id="g6c"><label for="g6c">c) über</label></div>
+                    <div class="mc-row"><input type="radio" name="g6" value="d" id="g6d"><label for="g6d">d) an</label></div>
+                </div>
+                <div class="question"><span class="question-num">7</span><span class="stmt">Sie ist Mitglied ____________ einem Sportverein in Berlin.</span>
+                    <div class="mc-row"><input type="radio" name="g7" value="a" id="g7a"><label for="g7a">a) in</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="b" id="g7b"><label for="g7b">b) bei</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="c" id="g7c"><label for="g7c">c) an</label></div>
+                    <div class="mc-row"><input type="radio" name="g7" value="d" id="g7d"><label for="g7d">d) für</label></div>
+                </div>
+                <div class="question"><span class="question-num">8</span><span class="stmt">Wir freuen uns schon ____________ das nächste Festival.</span>
+                    <div class="mc-row"><input type="radio" name="g8" value="a" id="g8a"><label for="g8a">a) für</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="b" id="g8b"><label for="g8b">b) an</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="c" id="g8c"><label for="g8c">c) auf</label></div>
+                    <div class="mc-row"><input type="radio" name="g8" value="d" id="g8d"><label for="g8d">d) um</label></div>
+                </div>
+                <div class="question"><span class="question-num">9</span><span class="stmt">Wegen ____________ Streaming-Sucht spielen viele Kinder weniger draußen.</span>
+                    <div class="mc-row"><input type="radio" name="g9" value="a" id="g9a"><label for="g9a">a) die</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="b" id="g9b"><label for="g9b">b) der</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="c" id="g9c"><label for="g9c">c) den</label></div>
+                    <div class="mc-row"><input type="radio" name="g9" value="d" id="g9d"><label for="g9d">d) das</label></div>
+                </div>
+                <div class="question"><span class="question-num">10</span><span class="stmt">Trotz ____________ hohen Eintrittspreises war das Konzert ausverkauft.</span>
+                    <div class="mc-row"><input type="radio" name="g10" value="a" id="g10a"><label for="g10a">a) der</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="b" id="g10b"><label for="g10b">b) dem</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="c" id="g10c"><label for="g10c">c) den</label></div>
+                    <div class="mc-row"><input type="radio" name="g10" value="d" id="g10d"><label for="g10d">d) des</label></div>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">C. Aktiv → Passiv (Präsens) — transformă propoziția (10p)</h3>
+                <p style="color: #6b7280; font-style: italic;">Exemplu: Der Künstler malt das Bild. → Das Bild wird vom Künstler gemalt.</p>
+
+                <div class="question"><span class="question-num">11</span><span class="stmt">Aktiv: <em>Der Regisseur dreht einen neuen Film.</em><br>Passiv:</span>
+                    <input type="text" name="g11" placeholder="Ein neuer Film wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">12</span><span class="stmt">Aktiv: <em>Die Band singt das neue Lied live.</em><br>Passiv:</span>
+                    <input type="text" name="g12" placeholder="Das neue Lied wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">13</span><span class="stmt">Aktiv: <em>Das Museum zeigt eine neue Ausstellung.</em><br>Passiv:</span>
+                    <input type="text" name="g13" placeholder="Eine neue Ausstellung wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">14</span><span class="stmt">Aktiv: <em>Viele Jugendliche spielen täglich Videospiele.</em><br>Passiv:</span>
+                    <input type="text" name="g14" placeholder="Videospiele werden ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+                <div class="question"><span class="question-num">15</span><span class="stmt">Aktiv: <em>Der Verein organisiert ein großes Sportturnier.</em><br>Passiv:</span>
+                    <input type="text" name="g15" placeholder="Ein großes Sportturnier wird ___">
+                    <span class="scroll-hint">← glisează →</span>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">D. Rechtschreibung — alege scrierea corectă (5p)</h3>
+
+                <div class="question"><span class="question-num">16</span><span class="stmt">die B____cher (cărțile)</span>
+                    <div class="mc-row"><input type="radio" name="o1" value="a" id="o1a"><label for="o1a">a) u — Bucher</label></div>
+                    <div class="mc-row"><input type="radio" name="o1" value="b" id="o1b"><label for="o1b">b) ü — Bücher</label></div>
+                    <div class="mc-row"><input type="radio" name="o1" value="c" id="o1c"><label for="o1c">c) e — Becher</label></div>
+                </div>
+                <div class="question"><span class="question-num">17</span><span class="stmt">die K____nstler (artiștii)</span>
+                    <div class="mc-row"><input type="radio" name="o2" value="a" id="o2a"><label for="o2a">a) u — Kunstler</label></div>
+                    <div class="mc-row"><input type="radio" name="o2" value="b" id="o2b"><label for="o2b">b) ü — Künstler</label></div>
+                    <div class="mc-row"><input type="radio" name="o2" value="c" id="o2c"><label for="o2c">c) ue — Kuenstler</label></div>
+                </div>
+                <div class="question"><span class="question-num">18</span><span class="stmt">die Aufnahme der M____nner (a bărbaților)</span>
+                    <div class="mc-row"><input type="radio" name="o3" value="a" id="o3a"><label for="o3a">a) a — Manner</label></div>
+                    <div class="mc-row"><input type="radio" name="o3" value="b" id="o3b"><label for="o3b">b) ä — Männer</label></div>
+                    <div class="mc-row"><input type="radio" name="o3" value="c" id="o3c"><label for="o3c">c) e — Menner</label></div>
+                </div>
+                <div class="question"><span class="question-num">19</span><span class="stmt">der gro____e Erfolg (succesul mare)</span>
+                    <div class="mc-row"><input type="radio" name="o4" value="a" id="o4a"><label for="o4a">a) ss — grosse</label></div>
+                    <div class="mc-row"><input type="radio" name="o4" value="b" id="o4b"><label for="o4b">b) ß — große</label></div>
+                    <div class="mc-row"><input type="radio" name="o4" value="c" id="o4c"><label for="o4c">c) s — grose</label></div>
+                </div>
+                <div class="question"><span class="question-num">20</span><span class="stmt">die Bewegungs____keit (mobilitatea)</span>
+                    <div class="mc-row"><input type="radio" name="o5" value="a" id="o5a"><label for="o5a">a) ki — Bewegungskit</label></div>
+                    <div class="mc-row"><input type="radio" name="o5" value="b" id="o5b"><label for="o5b">b) ke — Bewegungskeit</label></div>
+                    <div class="mc-row"><input type="radio" name="o5" value="c" id="o5c"><label for="o5c">c) kä — Bewegungskät</label></div>
+                </div>
+
+                <h3 style="color: #059669; margin-top: 30px;">E. Găsește greșeala — rescrie corect (5p)</h3>
+                <p style="color: #6b7280; font-style: italic;">În fiecare propoziție există <strong>o singură greșeală</strong> de ortografie (majusculă/minusculă sau literă greșită). Scrie cuvântul corect.</p>
+
+                <div class="question"><span class="question-num">21</span>
+                    <div class="ortho-error-box">Das museum hat 170 verschiedene Ausstellungen.</div>
+                    <input type="text" name="o6" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">22</span>
+                    <div class="ortho-error-box">Sport ist sehr Wichtig für die Gesundheit.</div>
+                    <input type="text" name="o7" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">23</span>
+                    <div class="ortho-error-box">Andreea Spielt jeden Tag Klavier.</div>
+                    <input type="text" name="o8" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">24</span>
+                    <div class="ortho-error-box">Die hobbys meiner Familie sind sehr unterschiedlich.</div>
+                    <input type="text" name="o9" placeholder="cuvântul corect">
+                </div>
+                <div class="question"><span class="question-num">25</span>
+                    <div class="ortho-error-box">Streaming-Dienste Verändern die Filmindustrie.</div>
+                    <input type="text" name="o10" placeholder="cuvântul corect">
+                </div>
+            </div>
+
+            <!-- ============ 2. HÖRVERSTEHEN ============ -->
+            <div class="exam-section" id="hoeren">
+                <h2>🎧 2. Hörverstehen</h2>
+                <div class="exam-meta"><span>⏱️ 10 min</span><span>📋 8 itemi</span><span>💯 20 puncte</span></div>
+
+                <h3 style="color: #059669;">Audio — Podcast „Kultur 2026" cu sociologa Dr. Anja Wagner (poți asculta de 2 ori)</h3>
+                <div class="audio-player-exam">
+                    <button onclick="playAudio('audio-1')">▶ Redă Audio</button>
+                    <button onclick="pauseAudio('audio-1')">⏸ Pauză</button>
+                    <span class="plays-left" id="plays-1">Ascultări rămase: 2</span>
+                    <audio id="audio-1" preload="none"><source src="audio/01-podcast-kultur.mp3" type="audio/mpeg"></audio>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic;">Itemii 26-29: alege varianta corectă (3p fiecare = 12p)</p>
+
+                <div class="question"><span class="question-num">26</span><span class="stmt">Wie viele Jahre arbeitet Dr. Wagner als Kultursoziologin?</span>
+                    <div class="mc-row"><input type="radio" name="h1" value="a" id="h1a"><label for="h1a">a) 5 Jahre</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="b" id="h1b"><label for="h1b">b) 12 Jahre</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="c" id="h1c"><label for="h1c">c) 18 Jahre</label></div>
+                    <div class="mc-row"><input type="radio" name="h1" value="d" id="h1d"><label for="h1d">d) 25 Jahre</label></div>
+                </div>
+                <div class="question"><span class="question-num">27</span><span class="stmt">Welches ist laut Dr. Wagner der größte Wandel in der Freizeitgestaltung?</span>
+                    <div class="mc-row"><input type="radio" name="h2" value="a" id="h2a"><label for="h2a">a) Mehr Zeit im Theater und Museum</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="b" id="h2b"><label for="h2b">b) Verlagerung von analoger zu digitaler Freizeit (Streaming, Gaming)</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="c" id="h2c"><label for="h2c">c) Mehr Sport im Freien</label></div>
+                    <div class="mc-row"><input type="radio" name="h2" value="d" id="h2d"><label for="h2d">d) Komplettes Verschwinden des Theaters</label></div>
+                </div>
+                <div class="question"><span class="question-num">28</span><span class="stmt">Was empfiehlt Dr. Wagner gegen die Streaming-Sucht?</span>
+                    <div class="mc-row"><input type="radio" name="h3" value="a" id="h3a"><label for="h3a">a) Streaming-Dienste komplett verbieten</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="b" id="h3b"><label for="h3b">b) Bewussten Konsum, Digital Detox und aktive Hobbys</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="c" id="h3c"><label for="h3c">c) Mehr teure Abonnements</label></div>
+                    <div class="mc-row"><input type="radio" name="h3" value="d" id="h3d"><label for="h3d">d) Nur ins Theater gehen</label></div>
+                </div>
+                <div class="question"><span class="question-num">29</span><span class="stmt">Was bedeutet „Erfahrungskultur" laut Dr. Wagner?</span>
+                    <div class="mc-row"><input type="radio" name="h4" value="a" id="h4a"><label for="h4a">a) Erfahrungen in Konzerten und Festivals — Erlebnisse statt Dinge kaufen</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="b" id="h4b"><label for="h4b">b) Nur ältere Menschen haben Kultur</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="c" id="h4c"><label for="h4c">c) Eine neue Sportart</label></div>
+                    <div class="mc-row"><input type="radio" name="h4" value="d" id="h4d"><label for="h4d">d) Ein Brettspiel für Familien</label></div>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic; margin-top: 24px;">Itemii 30-33: bifează <strong>Richtig (R)</strong> sau <strong>Falsch (F)</strong> (2p fiecare = 8p)</p>
+
+                <div class="question"><span class="question-num">30</span><span class="stmt">Laut Dr. Wagner verbringen Deutsche durchschnittlich 4 Stunden täglich mit Streaming.</span>
+                    <div class="mc-row"><input type="radio" name="h5" value="R" id="h5r"><label for="h5r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h5" value="F" id="h5f"><label for="h5f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">31</span><span class="stmt">In Deutschland gibt es über 87.000 Sportvereine.</span>
+                    <div class="mc-row"><input type="radio" name="h6" value="R" id="h6r"><label for="h6r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h6" value="F" id="h6f"><label for="h6f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">32</span><span class="stmt">Dr. Wagner meint, klassische Kultur (Theater, Oper) wird komplett verschwinden.</span>
+                    <div class="mc-row"><input type="radio" name="h7" value="R" id="h7r"><label for="h7r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h7" value="F" id="h7f"><label for="h7f">F — Falsch</label></div>
+                </div>
+                <div class="question"><span class="question-num">33</span><span class="stmt">Dr. Wagner sagt, kreative Hobbys (Malen, Kochen, Gärtnern) sind gut für die mentale Gesundheit.</span>
+                    <div class="mc-row"><input type="radio" name="h8" value="R" id="h8r"><label for="h8r">R — Richtig</label></div>
+                    <div class="mc-row"><input type="radio" name="h8" value="F" id="h8f"><label for="h8f">F — Falsch</label></div>
+                </div>
+            </div>
+
+            <!-- ============ 3. LESEVERSTEHEN ============ -->
+            <div class="exam-section" id="lesen">
+                <h2>📖 3. Leseverstehen</h2>
+                <div class="exam-meta"><span>⏱️ 15 min</span><span>📋 10 itemi</span><span>💯 25 puncte</span></div>
+
+                <h3 style="color: #059669;">Text — Articol despre Freizeitverhalten &amp; Kulturkonsum în Germania (studii 2025-2026)</h3>
+                <div class="reading-text">
+                    <h3>Freizeit 2026 — wie verbringen die Deutschen ihre freie Zeit?</h3>
+                    <p>Eine aktuelle Studie der <strong>GfK (Gesellschaft für Konsumforschung)</strong> aus dem Jahr 2026 zeigt einen klaren Trend: die Deutschen verbringen <strong>durchschnittlich 5,5 Stunden pro Tag</strong> mit Freizeitaktivitäten. Davon entfallen über <strong>3 Stunden auf Streaming-Dienste</strong> wie Netflix, Disney+ und Amazon Prime. Die klassische Tageszeitung hingegen liest nur noch jede dritte Person regelmäßig.</p>
+                    <p>Trotz der Streaming-Welle bleibt die <strong>Hochkultur</strong> stabil. Deutschland verfügt über mehr als <strong>6.800 Museen</strong> und über <strong>400 Theater</strong> — ein weltweit einmaliges kulturelles Netzwerk. Im Jahr 2025 besuchten rund <strong>22 Millionen Menschen</strong> ein klassisches Theater oder eine Oper. Trotzdem stehen viele Häuser vor finanziellen Problemen: die Eintrittspreise steigen, junge Besucher fehlen.</p>
+                    <p>Ein interessantes Phänomen ist der <strong>Vereinsboom</strong>. Deutschland hat über <strong>87.000 Sportvereine</strong> — Fußball, Tennis, Schach, Schießen, Karneval — und über 600.000 weitere Vereine für Kultur, Musik und Soziales. Ehrenamtliche Mitgliedschaft ist Teil der deutschen Identität. Laut Bundesverband sind <strong>44% der Erwachsenen</strong> in mindestens einem Verein aktiv.</p>
+                    <p>Bei den kreativen Hobbys gibt es klare Gewinner: <strong>Kochen</strong> (38%), <strong>Gartenarbeit</strong> (33%) und <strong>Fotografie</strong> (28%) führen die Liste an. Brettspiele erleben ein Comeback: nach der Pandemie spielen wieder mehr Familien gemeinsam, was Vereinsamung reduziert und Generationen verbindet.</p>
+                    <p>Das Problem unserer Zeit ist die <strong>Streaming-Sucht</strong>. Eine Studie der Universität Köln zeigt: <strong>18% der jungen Erwachsenen</strong> verbringen mehr als 6 Stunden täglich mit Streaming oder Gaming. Konsequenzen sind Bewegungsarmut, Schlafstörungen und soziale Vereinsamung. Immer mehr Menschen praktizieren deshalb <strong>Digital Detox</strong>: bewusste Pausen vom Bildschirm.</p>
+                    <p>Ein weiterer Trend ist die <strong>Erfahrungskultur</strong>: Jüngere Generationen geben lieber Geld für Erlebnisse aus — Festivals, Reisen, Konzerte — als für materielle Güter. Das Rolling-Stones-Konzert in Berlin war innerhalb von Minuten ausverkauft, obwohl die Tickets über 200 Euro kosteten.</p>
+                    <p>Dr. Anja Wagner, Kultursoziologin an der LMU München, erklärt: „Die Zukunft der Freizeit ist hybrid. Wir streamen, aber wir gehen auch ins Theater. Wir spielen Videospiele, aber wir wandern auch. Wir kochen zu Hause, aber wir genießen auch Festivals. Es geht nicht mehr um Entweder-oder, sondern um bewussten, ausgewogenen Konsum."</p>
+                    <p>Ihr Rat für eine gesunde Freizeitgestaltung: kombiniert digitale und analoge Hobbys, plant aktive Bewegung ein, pflegt soziale Kontakte über Vereine, und nehmt euch regelmäßig Zeit für Digital Detox. „Kultur ist nicht nur Konsum — sie ist eine Lebensform", so Wagner.</p>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic;">Itemii 34-38: alege varianta corectă (3p fiecare = 15p)</p>
+
+                <div class="question"><span class="question-num">34</span><span class="stmt">Wie viele Stunden pro Tag verbringen die Deutschen mit Freizeitaktivitäten (laut GfK)?</span>
+                    <div class="mc-row"><input type="radio" name="l1" value="a" id="l1a"><label for="l1a">a) 1 Stunde</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="b" id="l1b"><label for="l1b">b) 3 Stunden</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="c" id="l1c"><label for="l1c">c) Durchschnittlich 5,5 Stunden</label></div>
+                    <div class="mc-row"><input type="radio" name="l1" value="d" id="l1d"><label for="l1d">d) 12 Stunden</label></div>
+                </div>
+                <div class="question"><span class="question-num">35</span><span class="stmt">Wie viele Museen gibt es in Deutschland?</span>
+                    <div class="mc-row"><input type="radio" name="l2" value="a" id="l2a"><label for="l2a">a) 500</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="b" id="l2b"><label for="l2b">b) 2.000</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="c" id="l2c"><label for="l2c">c) Mehr als 6.800</label></div>
+                    <div class="mc-row"><input type="radio" name="l2" value="d" id="l2d"><label for="l2d">d) 50.000</label></div>
+                </div>
+                <div class="question"><span class="question-num">36</span><span class="stmt">Wie viel Prozent der jungen Erwachsenen verbringen mehr als 6 Stunden täglich mit Streaming/Gaming?</span>
+                    <div class="mc-row"><input type="radio" name="l3" value="a" id="l3a"><label for="l3a">a) 3%</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="b" id="l3b"><label for="l3b">b) 18%</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="c" id="l3c"><label for="l3c">c) 60%</label></div>
+                    <div class="mc-row"><input type="radio" name="l3" value="d" id="l3d"><label for="l3d">d) 90%</label></div>
+                </div>
+                <div class="question"><span class="question-num">37</span><span class="stmt">Was sind die TOP 3 kreative Hobbys in Deutschland?</span>
+                    <div class="mc-row"><input type="radio" name="l4" value="a" id="l4a"><label for="l4a">a) Kochen, Gartenarbeit, Fotografie</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="b" id="l4b"><label for="l4b">b) Schach, Briefmarken sammeln, Stricken</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="c" id="l4c"><label for="l4c">c) Tanzen, Schwimmen, Lesen</label></div>
+                    <div class="mc-row"><input type="radio" name="l4" value="d" id="l4d"><label for="l4d">d) Gaming, Streaming, Social Media</label></div>
+                </div>
+                <div class="question"><span class="question-num">38</span><span class="stmt">Was ist laut Dr. Wagner die Zukunft der Freizeit?</span>
+                    <div class="mc-row"><input type="radio" name="l5" value="a" id="l5a"><label for="l5a">a) Nur klassische Kultur (Theater, Oper)</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="b" id="l5b"><label for="l5b">b) Hybride Freizeit — Mix von digital und analog</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="c" id="l5c"><label for="l5c">c) Nur Streaming und Gaming</label></div>
+                    <div class="mc-row"><input type="radio" name="l5" value="d" id="l5d"><label for="l5d">d) Komplettes Verbot von Hobbys</label></div>
+                </div>
+
+                <p style="color: #6b7280; font-style: italic; margin-top: 24px;">Itemii 39-43: răspunde scurt (un cuvânt, o cifră sau o expresie) (2p fiecare = 10p)</p>
+
+                <div class="question"><span class="question-num">39</span><span class="stmt">Welche Institution hat die Studie zur Freizeitgestaltung 2026 durchgeführt?</span>
+                    <input type="text" name="l6" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">40</span><span class="stmt">Wie viele Sportvereine gibt es in Deutschland?</span>
+                    <input type="text" name="l7" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">41</span><span class="stmt">Wie viel Prozent der Deutschen sind in mindestens einem Verein aktiv?</span>
+                    <input type="text" name="l8" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">42</span><span class="stmt">An welcher Universität arbeitet Dr. Anja Wagner?</span>
+                    <input type="text" name="l9" placeholder="...">
+                </div>
+                <div class="question"><span class="question-num">43</span><span class="stmt">Nenne 3 Empfehlungen von Dr. Wagner für eine gesunde Freizeitgestaltung:</span>
+                    <input type="text" name="l10" placeholder="z.B. ___, ___, ___">
+                </div>
+            </div>
+
+            <!-- ============ 4. SPRECHEN ============ -->
+            <div class="exam-section" id="sprechen">
+                <h2>🗣️ 4. Sprechen — Dialog cu un coleg cursant (proba orală)</h2>
+                <div class="exam-meta"><span>⏱️ 5-7 min</span><span>📋 1 dialog în pereche</span><span>💯 15 puncte</span></div>
+
+                <p style="background: #fef3c7; padding: 12px 16px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                    <strong>Atenție:</strong> Această secțiune se desfășoară <strong>oral, în pereche cu un alt cursant</strong>. Examinatorul vă dă cartonașele cu rolul cu 1-2 minute înainte. Dacă numărul cursanților e impar, ultimul dialoghează cu examinatorul.
+                </p>
+
+                <div class="speaking-card">
+                    <h4>💬 Tema: „Hochkultur vs. Popkultur — was bevorzugst du in deiner Freizeit?"</h4>
+                    <p>Doi prieteni discută despre cum își petrec timpul liber. <strong>Cursant A</strong> apără <strong>Hochkultur</strong> (Theater, Oper, Museum, klassische Musik, Konzert, Galerie — Kunst tradiționale, valori culturale, calitate, eveniment social, „sich bilden"), <strong>Cursant B</strong> apără <strong>Popkultur & digitale Unterhaltung</strong> (Streaming, Gaming, Festivals, Pop-Konzerte, Serien, Podcasts — Accessibility, modern, divers, gratuit/ieftin, interactiv). Discutați argumentele, avantajele și dezavantajele. Încercați să găsiți puncte comune (Erfahrungskultur, hibrid).</p>
+                    <p>Discutați împreună timp de 5-7 minute, în mod natural, ca într-o conversație reală. Examinatorul poate pune întrebări clarificatoare.</p>
+                </div>
+
+                <div class="role-card">
+                    <strong class="role-label">🅰️ Cursant A — pro Hochkultur</strong>
+                    <ul>
+                        <li>Apără calitatea: „Eine professionelle Inszenierung im Theater hat eine ganz andere Qualität als ein Stream"</li>
+                        <li>Vorbește despre Bildung: Museen lehren uns Geschichte und Kunst, Konzerte sind gesellschaftliche Ereignisse</li>
+                        <li>Mentionează că Hochkultur conectează generații și ne ajută să ne dezvoltăm — „Bildung durch Kultur"</li>
+                        <li>Acceptă probleme: hohe Eintrittspreise, weniger junge Besucher — caută compromis cu cursant B (Festivals + klassische Kultur)</li>
+                    </ul>
+                </div>
+
+                <div class="role-card">
+                    <strong class="role-label">🅱️ Cursant B — pro Popkultur / digitale Unterhaltung</strong>
+                    <ul>
+                        <li>Apără accessibilitatea: „Streaming ist günstig und für alle zugänglich, jederzeit überall"</li>
+                        <li>Vorbește despre Diversität: Spotify und Netflix bieten Inhalte aus aller Welt, von Independent bis Mainstream</li>
+                        <li>Mentionează Erfahrungskultur: Festivals, Gaming-Events, Pop-Konzerte schaffen unvergessliche Erlebnisse für junge Menschen</li>
+                        <li>Acceptă probleme: Streaming-Sucht, Bewegungsarmut — caută compromis: bewusster Konsum + Digital Detox</li>
+                    </ul>
+                </div>
+
+                <p style="margin-top: 16px; color: #6b7280; font-style: italic;">📊 Cotare (15p): realizarea sarcinii (5p) · coerență + fluență (4p) · vocabular (3p) · gramatică + pronunție (3p)</p>
+            </div>
+
+            <button class="submit-btn" onclick="submitExam()">📨 Trimite examenul</button>
+
+        </div>
+
+        <div class="submitted-message" id="submitted">
+            <h2>✓ Examenul a fost trimis!</h2>
+            <p>Ai finalizat Test 10 — Kultur &amp; Freizeit.</p>
+            <p>Răspunsurile tale au fost salvate. <strong>Examinatorul</strong> îți va comunica scorul și rezultatul după ce verifică totul.</p>
+            <p style="margin-top: 24px; color: #991b1b; font-weight: 600;">Examen oficial — testul nu mai poate fi reluat.</p>
+            <p style="margin-top: 30px; font-size: 1.5rem;">ʚଓ</p>
+        </div>
+
+        <!-- Modal pentru identificare cursant -->
+        <div id="identity-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center;">
+            <div style="background:white; padding:30px 35px; border-radius:14px; max-width:480px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                <h2 style="color:#065f46; margin-top:0;">📝 Identificare cursant</h2>
+                <p style="color:#374151;">Înainte de a trimite examenul, te rog completează numele tău complet pentru ca examinatorul să poată corecta răspunsurile.</p>
+                <div style="margin:18px 0;">
+                    <label style="display:block; font-weight:600; color:#065f46; margin-bottom:6px;">Nume (de familie):</label>
+                    <input type="text" id="modal-nume" style="width:100%; padding:11px; border:2px solid #d1d5db; border-radius:8px; font-size:1rem; box-sizing:border-box;" placeholder="ex: Popescu" autocomplete="family-name">
+                </div>
+                <div style="margin:18px 0;">
+                    <label style="display:block; font-weight:600; color:#065f46; margin-bottom:6px;">Prenume:</label>
+                    <input type="text" id="modal-prenume" style="width:100%; padding:11px; border:2px solid #d1d5db; border-radius:8px; font-size:1rem; box-sizing:border-box;" placeholder="ex: Maria" autocomplete="given-name">
+                </div>
+                <div id="modal-error" style="color:#dc2626; font-size:0.9rem; margin:8px 0; display:none;">⚠️ Te rog completează ambele câmpuri.</div>
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                    <button onclick="cancelSubmit()" style="background:#6b7280; color:white; border:none; padding:11px 22px; border-radius:8px; cursor:pointer; font-weight:600;">Anulează</button>
+                    <button onclick="confirmSubmit()" style="background:#10B981; color:white; border:none; padding:11px 22px; border-radius:8px; cursor:pointer; font-weight:600;">✓ Trimite examenul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="test.js"></script>
+</body>
+</html>
