@@ -252,7 +252,7 @@ function normalize(s, flexUmlaut = true) {
     if (flexUmlaut) {
         r = r.replace(/ß/g, 'ss').replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue');
     }
-    return r.replace(/\s+/g, ' ').replace(/[.,;:!?]+$/g, '');
+    return r.replace(/\s+/g, ' ').replace(/^[\s.,;:!?]+|[\s.,;:!?]+$/g, '');
 }
 
 function isCorrect(itemKey, userValue) {
