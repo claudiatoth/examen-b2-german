@@ -249,6 +249,8 @@ function loadAnswers() {
 // ============================================
 function normalize(s, flexUmlaut = true) {
     let r = (s || '').toString().trim().toLowerCase();
+    // contractii prepozitie+articol: forma lunga = forma contrasa (von dem = vom etc.)
+    r = r.replace(/\bvon dem\b/g, 'vom').replace(/\bbei dem\b/g, 'beim').replace(/\bzu dem\b/g, 'zum').replace(/\bzu der\b/g, 'zur').replace(/\bin dem\b/g, 'im').replace(/\ban dem\b/g, 'am').replace(/\bin das\b/g, 'ins').replace(/\ban das\b/g, 'ans').replace(/\bauf das\b/g, 'aufs').replace(/\bdurch das\b/g, 'durchs').replace(/\bfür das\b/g, 'fürs').replace(/\bum das\b/g, 'ums').replace(/\bvor dem\b/g, 'vorm').replace(/\büber das\b/g, 'übers');
     if (flexUmlaut) {
         r = r.replace(/ß/g, 'ss').replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue');
     }
@@ -412,7 +414,7 @@ async function confirmSubmit() {
 
     try {
         localStorage.removeItem(TEST_ID);
-        localStorage.setItem(TEST_ID + '-submitted', new Date().toISOString());
+        /* lock reluare dezactivat — nu mai marcam testul ca trimis permanent */
     } catch (e) {}
 
     if (!success) {
@@ -441,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {}
 
     try {
-        if (localStorage.getItem(TEST_ID + '-submitted')) {
+        if (false) {  // lock reluare DEZACTIVAT — testul poate fi reluat
             document.getElementById('exam-content').style.display = 'none';
             document.getElementById('submitted').style.display = 'block';
             return;

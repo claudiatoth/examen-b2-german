@@ -58,6 +58,16 @@ def parse_answer_key(test_js_path: Path) -> dict:
         items = re.findall(r"'([^']*)'", arr_content)
         if not items:
             items = re.findall(r'"([^"]*)"', arr_content)
+        # Greșeli (o6-o10): câmpul `right` are forma corectă CAPITALIZATĂ (ex: Arzt),
+        # pe când `correct` e lowercase pentru matching. Folosim `right` la afișare.
+        if key.startswith('o'):
+            tail = block[m.end():]
+            cut = tail.find('}')
+            seg = tail[:cut] if cut != -1 else tail[:160]
+            rm = re.search(r"""right\s*:\s*['"]([^'"]*)['"]""", seg)
+            if rm:
+                right_val = rm.group(1)
+                items = [right_val] + [i for i in items if i != right_val]
         answers[key] = items
 
     return answers
@@ -80,6 +90,46 @@ def format_answer_full(key: str, items: list, max_alts: int = 3) -> str:
         alts = " · alt: " + ", ".join(items[1:max_alts+1])
         return main + alts
     return main
+
+
+def cap_short(text: str) -> str:
+    """Capitalize nouns/proper-nouns in a short German answer-key entry, leaving
+    articles/prepositions/general adjectives lowercase; exact-case acronyms; URLs/numbers intact."""
+    STOP = {'an', 'der', 'die', 'das', 'dem', 'den', 'des', 'ein', 'eine', 'einen', 'einem', 'einer',
+            'und', 'oder', 'von', 'vom', 'für', 'fuer', 'im', 'in', 'mit', 'zu', 'zur', 'zum', 'am', 'beim',
+            'nach', 'bis', 'als', 'über', 'ueber', 'mehr', 'plus', 'pro', 'aktive', 'soziale', 'digital',
+            'analog', 'hybrid', 'verschiedene', 'neue', 'kombiniert', 'kombinieren',
+            # cuvinte-numere (Zahlwörter) — rămân mici ca în germană (achtundfünfzig prozent)
+            'vier', 'fünfzig', 'fuenfzig', 'achtundfünfzig', 'achtundfuenfzig', 'dreißig', 'dreissig',
+            'vierundvierzig', 'einundvierzig', 'sechsundvierzig', 'siebenundsechzig', 'siebenundzwanzig',
+            'zweiundzwanzig', 'neunzehn', 'zwölf', 'zwoelf', 'zehnte', 'zwanzig',
+            'fünfundzwanzigtausend', 'fuenfundzwanzigtausend', 'siebenundachtzigtausend'}
+    ACR = {'brd': 'BRD', 'gfk': 'GfK', 'tu': 'TU', 'lmu': 'LMU', 'ard': 'ARD', 'co2': 'CO2', 'eu': 'EU'}
+
+    def cap_seg(s):
+        if not s:
+            return s
+        if s.lower() in ACR:
+            return ACR[s.lower()]
+        return s[:1].upper() + s[1:]
+
+    def cap_word(w):
+        m = re.match(r'^(.*?)([,.;:]*)$', w)
+        core, punct = m.group(1), m.group(2)
+        lw = core.lower()
+        if not core:
+            return w
+        if 'www.' in lw or lw.endswith('.de'):
+            return w  # URL
+        if lw in ACR:
+            return ACR[lw] + punct
+        if core[0].isdigit():
+            return w  # number
+        if lw in STOP:
+            return lw + punct
+        return '-'.join(cap_seg(s) for s in core.split('-')) + punct  # acronime și în segmente cu cratimă
+
+    return ' '.join(cap_word(w) for w in text.split(' '))
 
 
 def build_grammatik_html(answers: dict) -> str:
@@ -109,25 +159,31 @@ def build_grammatik_html(answers: dict) -> str:
 
     # Passiv shows full sentence, one per line; capitalize German nouns properly
     GERMAN_CAPITALIZE = [
-        # Universal across tests
-        'Mietvertrag', 'Vermieter', 'Mieter', 'Mietspiegel', 'Wohnungen', 'Wohnung', 'Investoren',
-        'Innenstadt', 'Stadt', 'Nebenkosten', 'Monat', 'Architekten', 'Wohnviertel',
-        # Test 10 (Kultur)
-        'Film', 'Regisseur', 'Lied', 'Band', 'Ausstellung', 'Museum', 'Videospiele', 'Jugendlichen',
-        'Sportturnier', 'Verein',
-        # Test 8 (Medien)
-        'Artikel', 'Journalisten', 'Fake News', 'Menschen', 'Medien', 'Inhalte', 'Algorithmus',
-        'Geld', 'Influencern', 'Werbung', 'Quelle', 'Redaktion',
-        # Test 7 (Familie)
-        'Eltern', 'Kinder', 'Familie', 'Großmutter', 'Vater',
-        # Test 6 (Reisen)
-        'Reise', 'Hotel', 'Flug', 'Tourist', 'Sehenswürdigkeiten',
-        # Test 5 (Gesundheit)
-        'Arzt', 'Patient', 'Krankenhaus', 'Sport', 'Gesundheit',
-        # Test 4 (Technologie)
-        'Computer', 'Internet', 'App', 'Smartphone', 'Daten',
-        # Test 3 (Umwelt)
-        'Klima', 'Umwelt', 'Müll', 'CO2', 'Wald', 'Politiker',
+        # T1 (Arbeit)
+        'Mitarbeiter', 'Firma', 'Meeting', 'Manager', 'Bericht', 'Sekretärin', 'Regel', 'Lehrer', 'Brot', 'Mutter',
+        # T2 (Bildung)
+        'Studiengänge', 'Universität', 'Klassenarbeit', 'Hausarbeit', 'Studenten', 'Studienreise', 'Schule', 'Auszubildenden',
+        # T3 (Umwelt)
+        'Plastikmüll', 'Bürgern', 'Klimagesetze', 'Regierung', 'Frühling', 'Bäume', 'Stadt', 'Mengen', 'CO2',
+        'Industrie', 'Klimawandel', 'Wissenschaftlern', 'Klima', 'Umwelt', 'Müll', 'Wald', 'Politiker',
+        # T4 (Technologie)
+        'Daten', 'Plattform', 'Fotos', 'Jugendlichen', 'Smartphones', 'Unterricht', 'Bildschirmzeit', 'Kinder', 'Eltern',
+        'Informationen', 'Fake', 'News', 'Computer', 'Internet', 'App', 'Smartphone',
+        # T5 (Gesundheit)
+        'Medikament', 'Hausarzt', 'Menschen', 'Sport', 'Vitamine', 'Apotheke', 'Programm', 'Trainer', 'Immunsystem', 'Ernährung',
+        'Arzt', 'Patient', 'Krankenhaus', 'Gesundheit',
+        # T6 (Reisen)
+        'Flug', 'Reisebüro', 'Venedig', 'Touristen', 'Tourismussteuer', 'Tour', 'Reiseführer', 'Reisekosten', 'Backpacking',
+        'Reise', 'Hotel', 'Tourist', 'Sehenswürdigkeiten',
+        # T7 (Familie)
+        'Mihai', 'Andreea', 'Sommer', 'Familienpolitik', 'Staat', 'Enkel', 'Großeltern', 'Familie', 'Großmutter', 'Vater',
+        # T8 (Medien)
+        'Artikel', 'Journalisten', 'Medien', 'Inhalte', 'Algorithmus', 'Geld', 'Influencern', 'Werbung', 'Quelle', 'Redaktion',
+        # T9 (Wohnen)
+        'Mietvertrag', 'Vermieter', 'Mieter', 'Mietspiegel', 'Wohnungen', 'Wohnung', 'Investoren', 'Innenstadt',
+        'Nebenkosten', 'Monat', 'Architekten', 'Wohnviertel',
+        # T10 (Kultur)
+        'Film', 'Regisseur', 'Lied', 'Band', 'Ausstellung', 'Museum', 'Videospiele', 'Sportturnier', 'Verein',
     ]
     passiv_html = ''
     for k in g_passiv:
@@ -151,6 +207,7 @@ def build_grammatik_html(answers: dict) -> str:
     <div class="answer-row">{row(g_prepoz)}</div>
 
     <h3 class="sec-h3">C. Aktiv → Passiv (5×2p = 10p)</h3>
+    <p style="font-size:9.5pt; color:#6b7280; font-style:italic; margin:2px 0 8px;">ℹ️ Se acceptă ambele forme ale prepoziției contrase: <strong>„vom" = „von dem"</strong>, „beim" = „bei dem", „zum" = „zu dem" etc. — sunt echivalente, NU le considera greșeli.</p>
     <div class="answer-block">{passiv_html}</div>
 
     <h3 class="sec-h3">D. Rechtschreibung (5×1p = 5p)</h3>
@@ -195,8 +252,8 @@ def build_lesen_html(answers: dict) -> str:
     short_html = ''
     for i, k in enumerate(['l6', 'l7', 'l8', 'l9', 'l10'], start=39):
         items = answers.get(k, [])
-        main = items[0] if items else '?'
-        alts = items[1:4] if len(items) > 1 else []
+        main = cap_short(items[0]) if items else '?'
+        alts = [cap_short(a) for a in (items[1:4] if len(items) > 1 else [])]
         alts_str = f' <em class="alts">(acceptat și: {", ".join(alts)})</em>' if alts else ''
         short_html += f'<div class="short-line"><strong>{i}.</strong> {main}{alts_str}</div>\n'
 
